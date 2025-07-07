@@ -65,7 +65,7 @@ python main.py
 
 ## アクセスURL
 
-- **フロントエンド**: http://localhost:3000
+- **フロントエンド**: 3000http://localhost:3000
 - **バックエンドAPI**: http://localhost:8000
 - **API ドキュメント**: http://localhost:8000/docs
 
