@@ -1,4 +1,12 @@
 import Link from 'next/link'
+import { 
+  ChartBarIcon,
+  DocumentTextIcon,
+  CreditCardIcon,
+  BuildingOfficeIcon,
+  UserGroupIcon,
+  Cog6ToothIcon
+} from '@heroicons/react/24/outline'
 
 export default function Home() {
   return (
@@ -12,54 +20,127 @@ export default function Home() {
             売上管理・成績・請求書作成・経理台帳の一気通貫システム
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <Link href="/dashboard" className="card hover:shadow-lg transition-shadow duration-200 bg-gradient-to-br from-blue-50 to-blue-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* ダッシュボード */}
+            <Link href="/dashboard" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+                  <ChartBarIcon className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">ダッシュボード</h3>
-                <p className="text-gray-600">全体の状況を一覧で確認</p>
+                <p className="text-gray-600 text-sm">全体の状況を一覧で確認できます</p>
               </div>
             </Link>
 
-            <Link href="/sales" className="card hover:shadow-lg transition-shadow duration-200">
+            {/* 案件管理 */}
+            <Link href="/projects" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+                  <DocumentTextIcon className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">売上管理</h3>
-                <p className="text-gray-600">売上・コスト・予算の管理</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">案件管理</h3>
+                <p className="text-gray-600 text-sm">案件の一覧・詳細・作成・編集</p>
               </div>
             </Link>
 
-            <Link href="/performance" className="card hover:shadow-lg transition-shadow duration-200">
+            {/* 請求管理 */}
+            <Link href="/dashboard" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">成績管理</h3>
-                <p className="text-gray-600">個人・事業部の実績管理</p>
-              </div>
-            </Link>
-
-            <Link href="/billing" className="card hover:shadow-lg transition-shadow duration-200">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                  <CreditCardIcon className="w-8 h-8 text-purple-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">請求管理</h3>
-                <p className="text-gray-600">請求書作成・送付・入金管理</p>
+                <p className="text-gray-600 text-sm">請求書作成・申請・承認・差戻し管理</p>
               </div>
             </Link>
+
+
+
+            {/* 顧客管理 */}
+            <Link href="/masters/customers" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200 transition-colors">
+                  <BuildingOfficeIcon className="w-8 h-8 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">顧客管理</h3>
+                <p className="text-gray-600 text-sm">顧客情報の一覧・登録・編集</p>
+              </div>
+            </Link>
+
+            {/* シフト管理 */}
+            <Link href="/shifts" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-200 transition-colors">
+                  <UserGroupIcon className="w-8 h-8 text-yellow-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">シフト管理</h3>
+                <p className="text-gray-600 text-sm">稼働管理・シフト作成・編集</p>
+              </div>
+            </Link>
+
+            {/* マスタ設定 */}
+            <Link href="/masters" className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors">
+                  <Cog6ToothIcon className="w-8 h-8 text-gray-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">マスタ設定</h3>
+                <p className="text-gray-600 text-sm">各種マスタデータの管理</p>
+              </div>
+            </Link>
+          </div>
+
+          {/* 新機能のお知らせ */}
+          <div className="mt-12 bg-white rounded-xl shadow-sm p-6 max-w-4xl mx-auto">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">🎉 新機能リリース</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-medium text-blue-900 mb-2">✨ 請求書作成モーダル</h3>
+                <p className="text-sm text-blue-700">
+                  ページ遷移なしで請求書を作成できるモーダル機能を追加しました。
+                  リアルタイムプレビューで入力内容を確認できます。
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <h3 className="font-medium text-green-900 mb-2">📊 案件管理システム</h3>
+                <p className="text-sm text-green-700">
+                  案件の一覧表示、詳細確認、新規作成機能を実装しました。
+                  検索・フィルター機能で効率的に案件を管理できます。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* クイックアクセス */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">クイックアクセス</h3>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link 
+                href="/dashboard" 
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                請求管理
+              </Link>
+
+              <Link 
+                href="/projects" 
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                案件一覧
+              </Link>
+              <Link 
+                href="/dashboard" 
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              >
+                ダッシュボード
+              </Link>
+              <Link 
+                href="/masters/customers" 
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+              >
+                顧客管理
+              </Link>
+            </div>
           </div>
         </div>
       </div>

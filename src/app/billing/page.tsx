@@ -1,168 +1,194 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  EllipsisVerticalIcon,
-  DocumentTextIcon,
-  EnvelopeIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline'
+import Link from 'next/link'
+import BillingCreateModal from '@/components/billing/BillingCreateModal'
 
-// 仮のデータ
-const mockInvoices = [
-  {
-    id: 1,
-    invoiceNumber: 'INV-2024-001',
-    client: 'A株式会社',
-    project: 'A社コンサルティング案件',
-    amount: 2000000,
-    tax: 200000,
-    totalAmount: 2200000,
-    issueDate: '2024-01-15',
-    dueDate: '2024-02-15',
-    status: 'sent',
-    paymentStatus: 'pending',
-    sentDate: '2024-01-15',
-    paymentDate: null,
-    notes: '第1回請求書'
-  },
-  {
-    id: 2,
-    invoiceNumber: 'INV-2024-002',
-    client: 'B株式会社',
-    project: 'B社システム開発案件',
-    amount: 3000000,
-    tax: 300000,
-    totalAmount: 3300000,
-    issueDate: '2024-01-20',
-    dueDate: '2024-02-20',
-    status: 'sent',
-    paymentStatus: 'paid',
-    sentDate: '2024-01-20',
-    paymentDate: '2024-02-10',
-    notes: '第2回請求書'
-  },
-  {
-    id: 3,
-    invoiceNumber: 'INV-2024-003',
-    client: 'C株式会社',
-    project: 'C社DX推進案件',
-    amount: 1500000,
-    tax: 150000,
-    totalAmount: 1650000,
-    issueDate: '2024-01-25',
-    dueDate: '2024-02-25',
-    status: 'draft',
-    paymentStatus: 'pending',
-    sentDate: null,
-    paymentDate: null,
-    notes: '第1回請求書（下書き）'
-  },
-  {
-    id: 4,
-    invoiceNumber: 'INV-2024-004',
-    client: 'A株式会社',
-    project: 'A社コンサルティング案件',
-    amount: 1800000,
-    tax: 180000,
-    totalAmount: 1980000,
-    issueDate: '2024-02-01',
-    dueDate: '2024-03-01',
-    status: 'sent',
-    paymentStatus: 'overdue',
-    sentDate: '2024-02-01',
-    paymentDate: null,
-    notes: '第2回請求書'
-  }
-]
+interface BillingApplication {
+  id: string;
+  projectName: string;
+  clientName: string;
+  billingNumber: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  appliedAt: string;
+  appliedBy: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  comment?: string;
+}
 
-const invoiceStatuses = [
-  { id: 'all', name: '全て' },
-  { id: 'draft', name: '下書き' },
-  { id: 'sent', name: '送付済み' },
-  { id: 'cancelled', name: 'キャンセル' }
-]
-
-const paymentStatuses = [
-  { id: 'all', name: '全て' },
-  { id: 'pending', name: '未入金' },
-  { id: 'paid', name: '入金済み' },
-  { id: 'overdue', name: '期限超過' },
-  { id: 'partial', name: '一部入金' }
-]
+interface Project {
+  id: string;
+  name: string;
+  type: 'farm' | 'prime';
+  status: 'active' | 'completed' | 'pending';
+  client: string;
+  amount: number;
+}
 
 export default function BillingPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedInvoiceStatus, setSelectedInvoiceStatus] = useState('all')
-  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
+  const [activeTab, setActiveTab] = useState('create');
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectComment, setRejectComment] = useState('');
+  const [currentApplication, setCurrentApplication] = useState<BillingApplication | null>(null);
+  const [showBillingCreateModal, setShowBillingCreateModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const filteredInvoices = mockInvoices.filter(invoice => {
-    const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.project.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesInvoiceStatus = selectedInvoiceStatus === 'all' || invoice.status === selectedInvoiceStatus
-    const matchesPaymentStatus = selectedPaymentStatus === 'all' || invoice.paymentStatus === selectedPaymentStatus
-    
-    return matchesSearch && matchesInvoiceStatus && matchesPaymentStatus
-  })
-
-  const getInvoiceStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800'
-      case 'sent': return 'bg-blue-100 text-blue-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+  // サンプルデータ
+  const applications: BillingApplication[] = [
+    {
+      id: '1',
+      projectName: '農場A システム開発',
+      clientName: '農場A株式会社',
+      billingNumber: 'BILL-1-202401',
+      amount: 150000,
+      status: 'pending',
+      appliedAt: '2024-01-15',
+      appliedBy: '田中太郎'
+    },
+    {
+      id: '2',
+      projectName: 'プライム案件B 保守運用',
+      clientName: 'プライム企業B',
+      billingNumber: 'BILL-2-202401',
+      amount: 80000,
+      status: 'approved',
+      appliedAt: '2024-01-10',
+      appliedBy: '佐藤花子',
+      approvedBy: '経理担当者A',
+      approvedAt: '2024-01-12'
+    },
+    {
+      id: '3',
+      projectName: '農場C 設備導入',
+      clientName: '農場C有限会社',
+      billingNumber: 'BILL-3-202401',
+      amount: 200000,
+      status: 'rejected',
+      appliedAt: '2024-08-01',
+      appliedBy: '山田次郎',
+      approvedBy: '経理担当者B',
+      approvedAt: '2024-10-01',
+      comment: '請求書の明細が不正確です。修正して再申請してください。'
     }
-  }
+  ];
 
-  const getInvoiceStatusText = (status: string) => {
-    switch (status) {
-      case 'draft': return '下書き'
-      case 'sent': return '送付済み'
-      case 'cancelled': return 'キャンセル'
-      default: return status
+  const projects: Project[] = [
+    {
+      id: '1',
+      name: '農場A システム開発',
+      type: 'farm',
+      status: 'active',
+      client: '農場A株式会社',
+      amount: 150000
+    },
+    {
+      id: '2',
+      name: 'プライム案件B 保守運用',
+      type: 'prime',
+      status: 'active',
+      client: 'プライム企業B',
+      amount: 80000
+    },
+    {
+      id: '3',
+      name: '農場C 設備導入',
+      type: 'farm',
+      status: 'completed',
+      client: '農場C有限会社',
+      amount: 200000
     }
-  }
+  ];
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'paid': return 'bg-green-100 text-green-800'
-      case 'overdue': return 'bg-red-100 text-red-800'
-      case 'partial': return 'bg-orange-100 text-orange-800'
-      default: return 'bg-gray-100 text-gray-800'
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ja-JP', {
+      style: 'currency',
+      currency: 'JPY'
+    }).format(amount);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { text: '申請中', color: 'bg-yellow-100 text-yellow-800' },
+      approved: { text: '承認済み', color: 'bg-green-100 text-green-800' },
+      rejected: { text: '差戻し', color: 'bg-red-100 text-red-800' }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig];
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.text}
+      </span>
+    );
+  };
+
+  const getTypeBadge = (type: string) => {
+    const typeConfig = {
+      farm: { text: 'ファーム案件', color: 'bg-orange-100 text-orange-800' },
+      prime: { text: 'プライム案件', color: 'bg-purple-100 text-purple-800' }
+    };
+    const config = typeConfig[type as keyof typeof typeConfig];
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.text}
+      </span>
+    );
+  };
+
+  const handleSelectAll = () => {
+    const filteredApplications = applications.filter(app => app.status === 'pending');
+    if (selectedItems.length === filteredApplications.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(filteredApplications.map(app => app.id));
     }
-  }
+  };
 
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return '未入金'
-      case 'paid': return '入金済み'
-      case 'overdue': return '期限超過'
-      case 'partial': return '一部入金'
-      default: return status
+  const handleSelectItem = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(item => item !== id));
+    } else {
+      setSelectedItems([...selectedItems, id]);
     }
-  }
+  };
 
-  const getPaymentStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <ClockIcon className="w-4 h-4" />
-      case 'paid': return <CheckCircleIcon className="w-4 h-4" />
-      case 'overdue': return <ExclamationTriangleIcon className="w-4 h-4" />
-      case 'partial': return <ClockIcon className="w-4 h-4" />
-      default: return <ClockIcon className="w-4 h-4" />
+  const handleBulkApprove = () => {
+    if (selectedItems.length === 0) {
+      alert('承認する申請を選択してください。');
+      return;
     }
-  }
+    console.log('一括承認:', selectedItems);
+    alert(`${selectedItems.length}件の申請を承認しました。`);
+    setSelectedItems([]);
+  };
 
-  const isOverdue = (dueDate: string) => {
-    return new Date(dueDate) < new Date()
-  }
+  const handleReject = (application: BillingApplication) => {
+    setCurrentApplication(application);
+    setShowRejectModal(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (!rejectComment.trim()) {
+      alert('差戻し理由を入力してください。');
+      return;
+    }
+    console.log('差戻し:', currentApplication?.id, rejectComment);
+    alert('申請を差戻しました。');
+    setShowRejectModal(false);
+    setRejectComment('');
+    setCurrentApplication(null);
+  };
+
+  const handleCreateBilling = (project?: Project) => {
+    setSelectedProject(project || null);
+    setShowBillingCreateModal(true);
+  };
+
+  const handleCloseBillingModal = () => {
+    setShowBillingCreateModal(false);
+    setSelectedProject(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -171,273 +197,508 @@ export default function BillingPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">請求管理</h1>
-            <p className="text-gray-600 mt-1">請求書の作成・送付・入金管理を行えます</p>
+            <p className="text-gray-600 mt-1">請求書の作成・申請・承認・差戻し管理を行えます</p>
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-            <PlusIcon className="w-5 h-5" />
-            新規請求書作成
-          </button>
         </div>
       </div>
 
       {/* メインコンテンツ */}
       <div className="p-6">
-        {/* 検索・フィルター */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* 検索 */}
-            <div className="flex-1">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="請求書番号・顧客名・案件名で検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            {/* フィルター */}
-            <div className="flex gap-4">
-              <select
-                value={selectedInvoiceStatus}
-                onChange={(e) => setSelectedInvoiceStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {invoiceStatuses.map(status => (
-                  <option key={status.id} value={status.id}>{status.name}</option>
-                ))}
-              </select>
-              <select
-                value={selectedPaymentStatus}
-                onChange={(e) => setSelectedPaymentStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {paymentStatuses.map(status => (
-                  <option key={status.id} value={status.id}>{status.name}</option>
-                ))}
-              </select>
+        {/* タブ */}
+        <div className="bg-white rounded-lg shadow-sm mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
               <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                onClick={() => setActiveTab('create')}
+                className={`py-4 -mb-px border-b-2 font-medium text-sm ${
+                  activeTab === 'create'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
               >
-                <FunnelIcon className="w-5 h-5" />
-                詳細フィルター
+                請求書作成
               </button>
-            </div>
+              <button
+                onClick={() => setActiveTab('apply')}
+                className={`py-4 -mb-px border-b-2 font-medium text-sm ${
+                  activeTab === 'apply'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                申請一覧
+              </button>
+              <button
+                onClick={() => setActiveTab('approve')}
+                className={`py-4 -mb-px border-b-2 font-medium text-sm ${
+                  activeTab === 'approve'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                承認・差戻し
+              </button>
+              <button
+                onClick={() => setActiveTab('reject')}
+                className={`py-4 -mb-px border-b-2 font-medium text-sm ${
+                  activeTab === 'reject'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                差戻し案件
+              </button>
+            </nav>
           </div>
 
-          {/* 詳細フィルター */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 請求書作成タブ */}
+          {activeTab === 'create' && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">発行期間</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="date"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <span className="flex items-center">〜</span>
-                    <input
-                      type="date"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">請求書作成</h2>
+                  <p className="text-gray-600 mt-1">案件を選択して請求書を作成できます</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">請求金額範囲</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      placeholder="最小"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <span className="flex items-center">〜</span>
-                    <input
-                      type="number"
-                      placeholder="最大"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">顧客</label>
-                  <input
-                    type="text"
-                    placeholder="顧客名"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <button
+                  onClick={() => handleCreateBilling()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  新規請求書作成
+                </button>
               </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        案件名
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        タイプ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        クライアント
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        金額
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        アクション
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {projects.map((project) => (
+                      <tr key={project.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {project.name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getTypeBadge(project.type)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{project.client}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {formatCurrency(project.amount)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleCreateBilling(project)}
+                            className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-md transition-colors"
+                          >
+                            請求書作成
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* 申請一覧タブ */}
+          {activeTab === 'apply' && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">申請一覧</h2>
+                  <p className="text-gray-600 mt-1">申請中の請求書一覧</p>
+                </div>
+                <button
+                  onClick={() => handleCreateBilling()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  請求書作成
+                </button>
+              </div>
+              
+              {applications.filter(app => app.status === 'pending').length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          請求書番号
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          案件名
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          クライアント
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          金額
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          申請者
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          申請日
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          アクション
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {applications.filter(app => app.status === 'pending').map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {application.billingNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.projectName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.clientName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {formatCurrency(application.amount)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.appliedBy}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.appliedAt}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button className="text-blue-600 hover:text-blue-900">
+                              詳細
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg">申請中の請求書がありません</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 承認・差戻しタブ（経理担当者のみ） */}
+          {activeTab === 'approve' && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">承認・差戻し</h2>
+                  <p className="text-gray-600 mt-1">申請された請求書の承認・差戻しを行います</p>
+                </div>
+                <button
+                  onClick={() => handleCreateBilling()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  請求書作成
+                </button>
+              </div>
+              
+              {/* 一括操作ボタン */}
+              {applications.filter(app => app.status === 'pending').length > 0 && (
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === applications.filter(app => app.status === 'pending').length}
+                          onChange={handleSelectAll}
+                          className="rounded border-gray-300 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">全て選択</span>
+                      </label>
+                      {selectedItems.length > 0 && (
+                        <span className="text-sm text-gray-600">
+                          {selectedItems.length}件選択中
+                        </span>
+                      )}
+                    </div>
+                    {selectedItems.length > 0 && (
+                      <button
+                        onClick={handleBulkApprove}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                      >
+                        一括承認
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {applications.filter(app => app.status === 'pending').length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.length === applications.filter(app => app.status === 'pending').length}
+                            onChange={handleSelectAll}
+                            className="rounded border-gray-300 focus:ring-blue-500"
+                          />
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          請求書番号
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          案件名
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          クライアント
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          金額
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          申請者
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          申請日
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          アクション
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {applications.filter(app => app.status === 'pending').map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(application.id)}
+                              onChange={() => handleSelectItem(application.id)}
+                              className="rounded border-gray-300 focus:ring-blue-500"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {application.billingNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.projectName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.clientName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {formatCurrency(application.amount)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.appliedBy}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.appliedAt}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button className="text-blue-600 hover:text-blue-900">
+                                詳細
+                              </button>
+                              <button className="text-green-600 hover:text-green-900">
+                                承認
+                              </button>
+                              <button 
+                                onClick={() => handleReject(application)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                差戻し
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg">承認待ちの申請がありません</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 差戻し案件タブ */}
+          {activeTab === 'reject' && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">差戻し案件</h2>
+                  <p className="text-gray-600 mt-1">差戻された請求書の修正・再申請を行います</p>
+                </div>
+                <button
+                  onClick={() => handleCreateBilling()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  請求書作成
+                </button>
+              </div>
+              
+              {applications.filter(app => app.status === 'rejected').length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          請求書番号
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          案件名
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          クライアント
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          金額
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          申請者
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          差戻し日
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          アクション
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {applications.filter(app => app.status === 'rejected').map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {application.billingNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.projectName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.clientName}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {formatCurrency(application.amount)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.appliedBy}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{application.approvedAt}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Link
+                              href={`/billing/reject/${application.id}`}
+                              className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-md transition-colors"
+                            >
+                              修正・再申請
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg">差戻し案件がありません</div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* 統計情報 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">総請求書数</p>
-                <p className="text-2xl font-bold text-gray-900">{filteredInvoices.length}</p>
+        {/* 差戻しモーダル */}
+        {showRejectModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">差戻し理由</h2>
               </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">総請求金額</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ¥{filteredInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0).toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">未入金件数</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInvoices.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'overdue').length}
-                </p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <ClockIcon className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">期限超過</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInvoices.filter(inv => inv.paymentStatus === 'overdue').length}
-                </p>
-              </div>
-              <div className="bg-red-100 p-3 rounded-lg">
-                <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 請求書一覧 */}
-        <div className="bg-white rounded-xl border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">請求書一覧</h2>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {filteredInvoices.map((invoice) => (
-              <div key={invoice.id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{invoice.invoiceNumber}</h3>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getInvoiceStatusColor(invoice.status)}`}>
-                        {getInvoiceStatusText(invoice.status)}
-                      </span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(invoice.paymentStatus)}`}>
-                        {getPaymentStatusText(invoice.paymentStatus)}
-                      </span>
-                      {isOverdue(invoice.dueDate) && invoice.paymentStatus !== 'paid' && (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                          期限超過
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-gray-600">顧客</p>
-                        <p className="font-medium text-gray-900">{invoice.client}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">案件</p>
-                        <p className="font-medium text-gray-900">{invoice.project}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">発行日</p>
-                        <p className="font-medium text-gray-900">{invoice.issueDate}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">支払期日</p>
-                        <p className="font-medium text-gray-900">{invoice.dueDate}</p>
-                      </div>
-                    </div>
-
-                    {/* 金額情報 */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-gray-600">請求金額（税抜）</p>
-                        <p className="font-medium text-gray-900">¥{invoice.amount.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">消費税</p>
-                        <p className="font-medium text-gray-900">¥{invoice.tax.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">合計金額</p>
-                        <p className="font-medium text-gray-900">¥{invoice.totalAmount.toLocaleString()}</p>
-                      </div>
-                    </div>
-
-                    {/* 送付・入金情報 */}
-                    <div className="flex gap-6 text-sm">
-                      <div>
-                        <span className="text-gray-600">送付日: </span>
-                        <span className="font-medium">{invoice.sentDate || '未送付'}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">入金日: </span>
-                        <span className="font-medium">{invoice.paymentDate || '未入金'}</span>
-                      </div>
-                      {invoice.notes && (
-                        <div>
-                          <span className="text-gray-600">備考: </span>
-                          <span className="font-medium">{invoice.notes}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <button className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
-                      詳細
-                    </button>
-                    <button className="px-3 py-1 text-sm text-green-600 hover:bg-green-50 rounded-md transition-colors">
-                      送付
-                    </button>
-                    <button className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-50 rounded-md transition-colors">
-                      入金確認
-                    </button>
-                    <button className="p-1 text-gray-400 hover:text-gray-600 rounded-md transition-colors">
-                      <EllipsisVerticalIcon className="w-5 h-5" />
-                    </button>
-                  </div>
+              <div className="px-6 py-4">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    差戻し理由 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={rejectComment}
+                    onChange={(e) => setRejectComment(e.target.value)}
+                    placeholder="差戻し理由を入力してください..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowRejectModal(false);
+                      setRejectComment('');
+                      setCurrentApplication(null);
+                    }}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    onClick={handleRejectSubmit}
+                    disabled={!rejectComment.trim()}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    差戻し
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {filteredInvoices.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <DocumentTextIcon className="w-16 h-16 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">請求書が見つかりません</h3>
-            <p className="text-gray-600">検索条件を変更するか、新しい請求書を作成してください。</p>
           </div>
         )}
+
+        {/* 請求書作成モーダル */}
+        <BillingCreateModal
+          isOpen={showBillingCreateModal}
+          onClose={handleCloseBillingModal}
+          selectedProject={selectedProject}
+          projects={projects}
+        />
       </div>
     </div>
   )
