@@ -26,11 +26,11 @@ export default function Header() {
 
   // 仮のユーザー情報（実際の実装では認証システムから取得）
   const currentUser: User = {
-    id: '1',
-    name: '田中太郎',
-    department: 'sales',
-    role: 'user',
-    email: 'tanaka@festal.co.jp'
+    id: '4',
+    name: '山田次郎',
+    department: 'accounting',
+    role: 'admin',
+    email: 'yamada@festal.co.jp'
   };
 
   return (

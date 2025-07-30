@@ -32,6 +32,7 @@ const masterNavigation = [
   { name: '取引先マスタ', href: '/masters/customers' },
   { name: '店舗マスタ', href: '/masters/stores' },
   { name: '報酬マスタ', href: '/masters/rewards' },
+  { name: 'メールテンプレートマスタ', href: '/masters/email-templates' },
 ]
 
 export default function Sidebar() {
