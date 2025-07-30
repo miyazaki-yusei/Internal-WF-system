@@ -15,7 +15,6 @@ import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import QuickActions from '@/components/dashboard/QuickActions'
 import DepartmentTabs from '@/components/dashboard/DepartmentTabs'
 import FarmSummary from '@/components/dashboard/FarmSummary'
-import BillingManagement from '@/components/dashboard/BillingManagement'
 
 const activities = [
   {
@@ -55,7 +54,6 @@ const activities = [
 export default function DashboardPage() {
   const [department, setDepartment] = useState('all')
   const [consultingTab, setConsultingTab] = useState('farm')
-  const [billingTab, setBillingTab] = useState('create')
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,8 +70,6 @@ export default function DashboardPage() {
           setDepartment={setDepartment}
           consultingTab={consultingTab}
           setConsultingTab={setConsultingTab}
-          billingTab={billingTab}
-          setBillingTab={setBillingTab}
         />
 
         {/* 部門ごとの表示切り替え */}
@@ -138,11 +134,6 @@ export default function DashboardPage() {
             {consultingTab === 'performance' && (
               <div className="bg-white rounded-xl border border-gray-200 p-8 text-gray-700">成績表ダッシュボード（ここに内容を実装）</div>
             )}
-          </div>
-        ) : department === 'billing' ? (
-          <div>
-            {/* 請求管理タブ */}
-            <BillingManagement activeTab={billingTab} />
           </div>
         ) : (
           <div>

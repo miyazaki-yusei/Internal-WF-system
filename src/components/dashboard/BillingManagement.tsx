@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import BillingCreateModal from '@/components/billing/BillingCreateModal';
+import BillingRejectModal from '@/components/billing/BillingRejectModal';
 
 interface BillingApplication {
   id: string;
@@ -17,6 +18,56 @@ interface BillingApplication {
   approvedAt?: string;
   comment?: string;
 }
+
+interface User {
+  id: string;
+  name: string;
+  department: 'sales' | 'consulting' | 'regional' | 'accounting';
+  role: 'user' | 'admin';
+  email: string;
+}
+
+// ユーザー設定
+const users: User[] = [
+  {
+    id: '1',
+    name: '田中太郎',
+    department: 'sales',
+    role: 'user',
+    email: 'tanaka@festal.co.jp'
+  },
+  {
+    id: '2',
+    name: '佐藤花子',
+    department: 'consulting',
+    role: 'user',
+    email: 'sato@festal.co.jp'
+  },
+  {
+    id: '3',
+    name: '鈴木一郎',
+    department: 'regional',
+    role: 'user',
+    email: 'suzuki@festal.co.jp'
+  },
+  {
+    id: '4',
+    name: '山田次郎',
+    department: 'accounting',
+    role: 'admin',
+    email: 'yamada@festal.co.jp'
+  }
+];
+
+const getDepartmentName = (department: string) => {
+  const departmentNames = {
+    sales: '営業部',
+    consulting: 'コンサルティング事業部',
+    regional: '地方創生事業部',
+    accounting: '経理部'
+  };
+  return departmentNames[department as keyof typeof departmentNames] || department;
+};
 
 interface Project {
   id: string;
@@ -38,6 +89,8 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
   const [currentApplication, setCurrentApplication] = useState<BillingApplication | null>(null);
   const [showBillingCreateModal, setShowBillingCreateModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showBillingRejectModal, setShowBillingRejectModal] = useState(false);
+  const [selectedRejectedBilling, setSelectedRejectedBilling] = useState<BillingApplication | null>(null);
 
   // サンプルデータ
   const applications: BillingApplication[] = [
@@ -193,6 +246,62 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
     setSelectedProject(null);
   };
 
+  const handleRejectBilling = (application: BillingApplication) => {
+    setSelectedRejectedBilling(application);
+    setShowBillingRejectModal(true);
+  };
+
+  const handleCloseRejectModal = () => {
+    setShowBillingRejectModal(false);
+    setSelectedRejectedBilling(null);
+  };
+
+  const handleActionSelect = (application: BillingApplication, action: string) => {
+    switch (action) {
+      case 'detail':
+        console.log('詳細確認:', application.id);
+        // 詳細確認の処理
+        break;
+      case 'approve':
+        console.log('承認:', application.id);
+        handleApprove(application);
+        break;
+      case 'reject':
+        handleReject(application);
+        break;
+      case 'reject_billing':
+        handleRejectBilling(application);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleApprove = (application: BillingApplication) => {
+    // 承認処理
+    console.log('承認処理:', application.id);
+    
+    // SharePoint連携のプレースホルダー
+    // TODO: 承認後にSharePointに保存し、メール送信する処理を実装
+    console.log('SharePoint連携: 承認された請求書をSharePointに保存');
+    console.log('メール送信: 承認された請求書をメールに添付して送信');
+    
+    alert('承認しました。請求書がSharePointに保存され、メールで送信されます。');
+  };
+
+  const getUserInfo = (userId: string) => {
+    return users.find(user => user.id === userId) || null;
+  };
+
+  const getCurrentUser = () => {
+    // 実際の実装では認証システムから取得
+    return users[0]; // 仮に最初のユーザーを返す
+  };
+
+  const canApprove = (user: User) => {
+    return user.department === 'accounting' && user.role === 'admin';
+  };
+
   // 請求書作成タブ
   if (activeTab === 'create') {
     return (
@@ -321,6 +430,9 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       申請日
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ステータス
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       アクション
                     </th>
                   </tr>
@@ -350,10 +462,20 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{application.appliedAt}</div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(application.status)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900">
-                          詳細
-                        </button>
+                        <select
+                          onChange={(e) => handleActionSelect(application, e.target.value)}
+                          className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          defaultValue=""
+                        >
+                          <option value="">選択</option>
+                          <option value="detail">詳細確認</option>
+                          <option value="approve">承認</option>
+                          <option value="reject">差戻し</option>
+                        </select>
                       </td>
                     </tr>
                   ))}
@@ -454,6 +576,9 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       申請日
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ステータス
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       アクション
                     </th>
                   </tr>
@@ -491,21 +616,20 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{application.appliedAt}</div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(application.status)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
-                            詳細
-                          </button>
-                          <button className="text-green-600 hover:text-green-900">
-                            承認
-                          </button>
-                          <button 
-                            onClick={() => handleReject(application)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            差戻し
-                          </button>
-                        </div>
+                        <select
+                          onChange={(e) => handleActionSelect(application, e.target.value)}
+                          className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          defaultValue=""
+                        >
+                          <option value="">選択</option>
+                          <option value="detail">詳細確認</option>
+                          <option value="approve">承認</option>
+                          <option value="reject">差戻し</option>
+                        </select>
                       </td>
                     </tr>
                   ))}
@@ -611,6 +735,9 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       差戻し日
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ステータス
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       アクション
                     </th>
                   </tr>
@@ -640,13 +767,19 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{application.approvedAt}</div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(application.status)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Link
-                          href={`/billing/reject/${application.id}`}
-                          className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-md transition-colors"
+                        <select
+                          onChange={(e) => handleActionSelect(application, e.target.value)}
+                          className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          defaultValue=""
                         >
-                          修正・再申請
-                        </Link>
+                          <option value="">選択</option>
+                          <option value="detail">詳細確認</option>
+                          <option value="reject_billing">修正・再申請</option>
+                        </select>
                       </td>
                     </tr>
                   ))}
@@ -666,6 +799,13 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
           onClose={handleCloseBillingModal}
           selectedProject={selectedProject}
           projects={projects}
+        />
+
+        {/* 修正・再申請モーダル */}
+        <BillingRejectModal
+          isOpen={showBillingRejectModal}
+          onClose={handleCloseRejectModal}
+          billing={selectedRejectedBilling}
         />
       </div>
     );

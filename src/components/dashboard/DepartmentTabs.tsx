@@ -5,7 +5,6 @@ const departments = [
   { key: 'consulting', label: 'コンサル事業部' },
   { key: 'telecom', label: '通信事業部' },
   { key: 'regional', label: '地方創生事業部' },
-  { key: 'billing', label: '請求管理' },
 ]
 
 const consultingTabs = [
@@ -15,29 +14,18 @@ const consultingTabs = [
   { key: 'performance', label: '成績表' },
 ]
 
-const billingTabs = [
-  { key: 'create', label: '請求書作成' },
-  { key: 'apply', label: '申請一覧' },
-  { key: 'approve', label: '承認・差戻し' },
-  { key: 'reject', label: '差戻し案件' },
-]
-
 interface DepartmentTabsProps {
   department: string
   setDepartment: (key: string) => void
   consultingTab: string
   setConsultingTab: (key: string) => void
-  billingTab: string
-  setBillingTab: (key: string) => void
 }
 
 export default function DepartmentTabs({ 
   department, 
   setDepartment, 
   consultingTab, 
-  setConsultingTab,
-  billingTab,
-  setBillingTab
+  setConsultingTab
 }: DepartmentTabsProps) {
   return (
     <div className="mb-6">
@@ -70,25 +58,6 @@ export default function DepartmentTabs({
                   : 'border-transparent text-gray-500 bg-gray-100 hover:text-blue-600'
               }`}
               onClick={() => setConsultingTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* 請求管理サブタブ */}
-      {department === 'billing' && (
-        <div className="flex space-x-2 border-b mb-4">
-          {billingTabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                billingTab === tab.key
-                  ? 'border-blue-600 text-blue-700 bg-white'
-                  : 'border-transparent text-gray-500 bg-gray-100 hover:text-blue-600'
-              }`}
-              onClick={() => setBillingTab(tab.key)}
             >
               {tab.label}
             </button>

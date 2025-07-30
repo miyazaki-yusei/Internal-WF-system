@@ -1,59 +1,58 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
-interface Customer {
+interface Shift {
   id: string;
-  name: string;
-  code: string;
-  type: string;
-  address: string;
-  phone: string;
-  email: string;
-  status: 'active' | 'inactive';
+  employeeName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  project: string;
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
 }
 
-export default function CustomersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function ShiftsPage() {
+  const [selectedMonth, setSelectedMonth] = useState('2024-01');
 
   // サンプルデータ
-  const customers: Customer[] = [
+  const shifts: Shift[] = [
     {
       id: '1',
-      name: '農場A株式会社',
-      code: 'FARM001',
-      type: '農業法人',
-      address: '北海道札幌市中央区1-1-1',
-      phone: '011-123-4567',
-      email: 'info@farma.co.jp',
-      status: 'active'
+      employeeName: '田中太郎',
+      date: '2024-01-15',
+      startTime: '09:00',
+      endTime: '17:00',
+      project: '農場A システム開発',
+      status: 'completed'
     },
     {
       id: '2',
-      name: 'プライム企業B',
-      code: 'PRIME001',
-      type: '製造業',
-      address: '東京都渋谷区2-2-2',
-      phone: '03-1234-5678',
-      email: 'contact@primeb.co.jp',
-      status: 'active'
+      employeeName: '佐藤花子',
+      date: '2024-01-15',
+      startTime: '10:00',
+      endTime: '18:00',
+      project: 'プライム案件B 保守運用',
+      status: 'in-progress'
     },
     {
       id: '3',
-      name: '農場C有限会社',
-      code: 'FARM002',
-      type: '農業法人',
-      address: '茨城県水戸市3-3-3',
-      phone: '029-123-4567',
-      email: 'info@farmc.co.jp',
-      status: 'active'
+      employeeName: '鈴木一郎',
+      date: '2024-01-16',
+      startTime: '08:30',
+      endTime: '16:30',
+      project: '農場C 設備導入',
+      status: 'scheduled'
     }
   ];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { text: '有効', color: 'bg-green-100 text-green-800' },
-      inactive: { text: '無効', color: 'bg-red-100 text-red-800' }
+      scheduled: { text: '予定', color: 'bg-blue-100 text-blue-800' },
+      'in-progress': { text: '作業中', color: 'bg-yellow-100 text-yellow-800' },
+      completed: { text: '完了', color: 'bg-green-100 text-green-800' },
+      cancelled: { text: 'キャンセル', color: 'bg-red-100 text-red-800' }
     };
     const config = statusConfig[status as keyof typeof statusConfig];
     return (
@@ -67,67 +66,65 @@ export default function CustomersPage() {
     <div className="p-6">
       {/* ヘッダー */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">取引先マスタ</h1>
-        <p className="text-gray-600 mt-1">取引先の登録、編集、管理を行います</p>
+        <h1 className="text-3xl font-bold text-gray-900">シフト管理</h1>
+        <p className="text-gray-600 mt-1">従業員のシフトスケジュールを管理します</p>
       </div>
 
-      {/* 検索・操作 */}
+      {/* フィルター・操作 */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="取引先名、コードで検索..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
           <div className="flex gap-2">
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
             <select className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="">全ての種別</option>
-              <option value="agriculture">農業法人</option>
-              <option value="manufacturing">製造業</option>
-              <option value="service">サービス業</option>
+              <option value="">全ての従業員</option>
+              <option value="tanaka">田中太郎</option>
+              <option value="sato">佐藤花子</option>
+              <option value="suzuki">鈴木一郎</option>
             </select>
             <select className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="">全てのステータス</option>
-              <option value="active">有効</option>
-              <option value="inactive">無効</option>
+              <option value="scheduled">予定</option>
+              <option value="in-progress">作業中</option>
+              <option value="completed">完了</option>
+              <option value="cancelled">キャンセル</option>
             </select>
+          </div>
+          <div className="flex gap-2">
             <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              新規登録
+              シフト登録
+            </button>
+            <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              一括登録
             </button>
           </div>
         </div>
       </div>
 
-      {/* 取引先一覧 */}
+      {/* シフト一覧 */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">取引先一覧</h2>
+          <h2 className="text-lg font-semibold text-gray-900">シフト一覧</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  取引先名
+                  従業員名
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  コード
+                  日付
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  種別
+                  時間
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  住所
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  電話番号
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  メールアドレス
+                  案件
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   ステータス
@@ -138,28 +135,22 @@ export default function CustomersPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {customers.map((customer) => (
-                <tr key={customer.id} className="hover:bg-gray-50">
+              {shifts.map((shift) => (
+                <tr key={shift.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                    <div className="text-sm font-medium text-gray-900">{shift.employeeName}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.code}</div>
+                    <div className="text-sm text-gray-900">{shift.date}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.type}</div>
+                    <div className="text-sm text-gray-900">{shift.startTime} - {shift.endTime}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.address}</div>
+                    <div className="text-sm text-gray-900">{shift.project}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(customer.status)}
+                    {getStatusBadge(shift.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button className="text-blue-600 hover:text-blue-900 mr-3">

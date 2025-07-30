@@ -1,8 +1,6 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
 
 interface RejectedBilling {
   id: string;
@@ -27,45 +25,26 @@ interface BillingItem {
   amount: number;
 }
 
-export default function BillingRejectPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [billing, setBilling] = useState<RejectedBilling | null>(null);
-  const [loading, setLoading] = useState(true);
+interface BillingRejectModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  billing: RejectedBilling | null;
+}
+
+export default function BillingRejectModal({ 
+  isOpen, 
+  onClose, 
+  billing 
+}: BillingRejectModalProps) {
+  const [formData, setFormData] = useState<RejectedBilling | null>(null);
   const [reply, setReply] = useState('');
 
-  // サンプルデータ
-  const mockRejectedBilling: RejectedBilling = {
-    id: '3',
-    projectName: '農場C 設備導入',
-    clientName: '農場C有限会社',
-    billingNumber: 'BILL-3-202401',
-    amount: 200000,
-    appliedAt: '2024-08-01',
-    appliedBy: '山田次郎',
-    rejectedAt: '2024-10-01',
-    rejectedBy: '経理担当者B',
-    rejectComment: '請求書の明細が不正確です。修正して再申請してください。',
-    items: [
-      {
-        id: '1',
-        description: '農場C 設備導入',
-        quantity: 1,
-        unitPrice: 200000,
-        amount: 200000
-      }
-    ],
-    remarks: '設備導入に関する請求書です。'
-  };
-
   useEffect(() => {
-    const billingId = params.id as string;
-    // 実際の実装ではAPIからデータを取得
-    if (billingId === '3') {
-      setBilling(mockRejectedBilling);
+    if (billing) {
+      setFormData(billing);
+      setReply('');
     }
-    setLoading(false);
-  }, [params.id]);
+  }, [billing]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ja-JP', {
@@ -75,16 +54,16 @@ export default function BillingRejectPage() {
   };
 
   const updateItem = (index: number, field: keyof BillingItem, value: any) => {
-    if (!billing) return;
+    if (!formData) return;
     
-    const newItems = [...billing.items];
+    const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [field]: value };
     
     // 金額を再計算
     newItems[index].amount = newItems[index].quantity * newItems[index].unitPrice;
     
     const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
-    setBilling(prev => prev ? {
+    setFormData(prev => prev ? {
       ...prev,
       items: newItems,
       amount: totalAmount
@@ -98,61 +77,33 @@ export default function BillingRejectPage() {
     }
 
     // 修正・再申請処理
-    console.log('修正・再申請:', billing?.id, reply);
+    console.log('修正・再申請:', formData?.id, reply);
     alert('修正・再申請が完了しました。');
-    
-    // 申請一覧ページへ遷移
-    router.push('/billing/apply');
+    onClose();
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!billing) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">差戻し案件が見つかりません</h1>
-            <p className="text-gray-600 mb-6">指定された差戻し案件は存在しません。</p>
-            <Link
-              href="/billing/apply"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              申請一覧に戻る
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!isOpen || !formData) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ヘッダー */}
-        <div className="mb-8">
-          <Link
-            href="/billing/apply"
-            className="text-blue-600 hover:text-blue-800 inline-flex items-center mb-4"
-          >
-            ← 申請一覧に戻る
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">差戻し案件修正</h1>
-          <p className="text-gray-600 mt-1">経理からのコメントを確認し、修正して再申請してください</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">修正・再申請</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="px-6 py-4">
           {/* 差戻しコメント */}
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -162,20 +113,20 @@ export default function BillingRejectPage() {
               <div className="ml-3">
                 <h3 className="text-lg font-medium text-red-800">差戻しコメント</h3>
                 <p className="text-sm text-red-800 mt-2">
-                  <strong>差戻し担当者:</strong> {billing.rejectedBy}
+                  <strong>差戻し担当者:</strong> {formData.rejectedBy}
                 </p>
                 <p className="text-sm text-red-800 mt-2">
-                  <strong>差戻し日:</strong> {billing.rejectedAt}
+                  <strong>差戻し日:</strong> {formData.rejectedAt}
                 </p>
                 <p className="text-sm text-red-800 mt-2">
-                  {billing.rejectComment}
+                  {formData.rejectComment}
                 </p>
               </div>
             </div>
           </div>
 
           {/* 請求書情報 */}
-          <div className="bg-white rounded-lg shadow-sm">
+          <div className="bg-white rounded-lg shadow-sm mb-6">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">請求書情報</h2>
             </div>
@@ -185,19 +136,19 @@ export default function BillingRejectPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">請求書番号</label>
-                  <p className="text-gray-900">{billing.billingNumber}</p>
+                  <p className="text-gray-900">{formData.billingNumber}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">案件名</label>
-                  <p className="text-gray-900">{billing.projectName}</p>
+                  <p className="text-gray-900">{formData.projectName}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">顧客名</label>
-                  <p className="text-gray-900">{billing.clientName}</p>
+                  <p className="text-gray-900">{formData.clientName}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">申請者</label>
-                  <p className="text-gray-900">{billing.appliedBy}</p>
+                  <p className="text-gray-900">{formData.appliedBy}</p>
                 </div>
               </div>
 
@@ -205,7 +156,7 @@ export default function BillingRejectPage() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">請求項目</h3>
                 <div className="space-y-4">
-                  {billing.items.map((item, index) => (
+                  {formData.items.map((item, index) => (
                     <div key={item.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="md:col-span-2">
@@ -250,7 +201,7 @@ export default function BillingRejectPage() {
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-medium text-gray-900">合計金額</span>
-                  <span className="text-2xl font-bold text-blue-600">{formatCurrency(billing.amount)}</span>
+                  <span className="text-2xl font-bold text-blue-600">{formatCurrency(formData.amount)}</span>
                 </div>
               </div>
 
@@ -258,8 +209,8 @@ export default function BillingRejectPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">備考</label>
                 <textarea
-                  value={billing.remarks}
-                  onChange={(e) => setBilling(prev => prev ? { ...prev, remarks: e.target.value } : null)}
+                  value={formData.remarks}
+                  onChange={(e) => setFormData(prev => prev ? { ...prev, remarks: e.target.value } : null)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={3}
                 />
@@ -283,13 +234,14 @@ export default function BillingRejectPage() {
           </div>
 
           {/* アクションボタン */}
-          <div className="flex justify-end space-x-3">
-            <Link
-              href="/billing/apply"
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
               キャンセル
-            </Link>
+            </button>
             <button
               onClick={handleSubmit}
               disabled={!reply.trim()}
