@@ -1,4 +1,7 @@
+'use client'
+
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const departments = [
   { key: 'all', label: '全体' },
@@ -11,7 +14,6 @@ const consultingTabs = [
   { key: 'farm', label: 'ファーム集計' },
   { key: 'prime', label: 'プライム集計' },
   { key: 'budget', label: '予算集計' },
-  { key: 'performance', label: '成績表' },
 ]
 
 interface DepartmentTabsProps {
@@ -21,7 +23,38 @@ interface DepartmentTabsProps {
   setConsultingTab: (key: string) => void
 }
 
-export default function DepartmentTabs({ department, setDepartment, consultingTab, setConsultingTab }: DepartmentTabsProps) {
+export default function DepartmentTabs({ 
+  department, 
+  setDepartment, 
+  consultingTab, 
+  setConsultingTab
+}: DepartmentTabsProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const handleDepartmentChange = (newDepartment: string) => {
+    setDepartment(newDepartment)
+    if (newDepartment === 'consulting') {
+      // コンサル事業部に切り替えた場合、デフォルトでファーム集計を表示
+      const params = new URLSearchParams(searchParams)
+      params.delete('tab')
+      router.push(`/dashboard?${params.toString()}`)
+    } else {
+      // 他の部門に切り替えた場合、タブパラメータを削除
+      const params = new URLSearchParams(searchParams)
+      params.delete('tab')
+      router.push(`/dashboard?${params.toString()}`)
+    }
+  }
+
+  const handleConsultingTabChange = (newTab: string) => {
+    setConsultingTab(newTab)
+    // すべてのタブでURLパラメータを削除（成績表はサイドバーからアクセス）
+    const params = new URLSearchParams(searchParams)
+    params.delete('tab')
+    router.push(`/dashboard?${params.toString()}`)
+  }
+
   return (
     <div className="mb-6">
       {/* 部門タブ */}
@@ -31,10 +64,10 @@ export default function DepartmentTabs({ department, setDepartment, consultingTa
             key={d.key}
             className={`px-4 py-2 rounded-t-lg font-medium border-b-2 transition-colors ${
               department === d.key
-                ? 'border-primary-600 text-primary-700 bg-white'
-                : 'border-transparent text-gray-500 bg-gray-100 hover:text-primary-600'
+                ? 'border-blue-600 text-blue-700 bg-white'
+                : 'border-transparent text-gray-500 bg-gray-100 hover:text-blue-600'
             }`}
-            onClick={() => setDepartment(d.key)}
+            onClick={() => handleDepartmentChange(d.key)}
           >
             {d.label}
           </button>
@@ -49,10 +82,10 @@ export default function DepartmentTabs({ department, setDepartment, consultingTa
               key={tab.key}
               className={`px-4 py-2 font-medium border-b-2 transition-colors ${
                 consultingTab === tab.key
-                  ? 'border-primary-600 text-primary-700 bg-white'
-                  : 'border-transparent text-gray-500 bg-gray-100 hover:text-primary-600'
+                  ? 'border-blue-600 text-blue-700 bg-white'
+                  : 'border-transparent text-gray-500 bg-gray-100 hover:text-blue-600'
               }`}
-              onClick={() => setConsultingTab(tab.key)}
+              onClick={() => handleConsultingTabChange(tab.key)}
             >
               {tab.label}
             </button>

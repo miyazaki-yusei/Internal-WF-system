@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   CurrencyYenIcon,
   ArrowTrendingUpIcon,
@@ -15,6 +16,8 @@ import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import QuickActions from '@/components/dashboard/QuickActions'
 import DepartmentTabs from '@/components/dashboard/DepartmentTabs'
 import FarmSummary from '@/components/dashboard/FarmSummary'
+import PrimeSummary from '@/components/dashboard/PrimeSummary'
+import BudgetSummary from '@/components/dashboard/BudgetSummary'
 
 const activities = [
   {
@@ -52,8 +55,18 @@ const activities = [
 ]
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams()
   const [department, setDepartment] = useState('all')
   const [consultingTab, setConsultingTab] = useState('farm')
+
+  // URLパラメータからタブを読み取る（成績表のみ）
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab === 'performance') {
+      setDepartment('consulting')
+      setConsultingTab('performance')
+    }
+  }, [searchParams])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,13 +139,10 @@ export default function DashboardPage() {
               <FarmSummary />
             )}
             {consultingTab === 'prime' && (
-              <div className="bg-white rounded-xl border border-gray-200 p-8 text-gray-700">プライム集計ダッシュボード（ここに内容を実装）</div>
+              <PrimeSummary />
             )}
             {consultingTab === 'budget' && (
-              <div className="bg-white rounded-xl border border-gray-200 p-8 text-gray-700">予算集計ダッシュボード（ここに内容を実装）</div>
-            )}
-            {consultingTab === 'performance' && (
-              <div className="bg-white rounded-xl border border-gray-200 p-8 text-gray-700">成績表ダッシュボード（ここに内容を実装）</div>
+              <BudgetSummary />
             )}
           </div>
         ) : (

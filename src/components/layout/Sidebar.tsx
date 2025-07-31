@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -14,15 +14,16 @@ import {
   BellIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
   { name: 'ダッシュボード', href: '/dashboard', icon: HomeIcon },
-  { name: '案件一覧', href: '/sales', icon: DocumentTextIcon },
-  { name: 'シフト一覧', href: '/shifts', icon: CalendarIcon },
-  { name: '請求一覧', href: '/billing', icon: CreditCardIcon },
-  { name: 'ユーザー一覧', href: '/users', icon: UsersIcon },
+  { name: '案件管理', href: '/projects', icon: DocumentTextIcon },
+  { name: 'シフト管理', href: '/shifts', icon: CalendarIcon },
+  { name: '請求管理', href: '/billing', icon: CreditCardIcon },
+  { name: 'ユーザー管理', href: '/users', icon: UsersIcon },
   { name: '帳票出力', href: '/reports', icon: DocumentArrowDownIcon },
   { name: 'お知らせ', href: '/notifications', icon: BellIcon },
 ]
@@ -36,6 +37,7 @@ const masterNavigation = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [isMasterOpen, setIsMasterOpen] = useState(false)
 
   const isActive = (href: string) => {
@@ -43,6 +45,11 @@ export default function Sidebar() {
       return pathname === '/dashboard'
     }
     return pathname.startsWith(href)
+  }
+
+  const isPerformanceActive = () => {
+    const tab = searchParams.get('tab')
+    return pathname === '/dashboard' && tab === 'performance'
   }
 
   return (
@@ -77,6 +84,23 @@ export default function Sidebar() {
             {item.name}
           </Link>
         ))}
+
+        {/* 成績表 */}
+        <Link
+          href="/dashboard?tab=performance"
+          className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            isPerformanceActive()
+              ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
+              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <ChartBarIcon
+            className={`mr-3 h-5 w-5 flex-shrink-0 ${
+              isPerformanceActive() ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
+            }`}
+          />
+          成績表
+        </Link>
 
         {/* マスタ設定 */}
         <div>
