@@ -122,6 +122,143 @@ const detailData = {
   },
 }
 
+// 営業予算の内訳データ
+const salesBudgetDetail = {
+  2024: {
+    firstHalf: [
+      { category: '広告費', amount: 1200000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 800000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 600000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 400000, description: '顧客接待費用' }
+    ],
+    secondHalf: [
+      { category: '広告費', amount: 1760000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 1200000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 880000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 560000, description: '顧客接待費用' }
+    ],
+    fullYear: [
+      { category: '広告費', amount: 2960000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 2000000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 1480000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 960000, description: '顧客接待費用' }
+    ]
+  },
+  2025: {
+    firstHalf: [
+      { category: '広告費', amount: 1320000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 880000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 660000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 440000, description: '顧客接待費用' }
+    ],
+    secondHalf: [
+      { category: '広告費', amount: 1936000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 1320000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 968000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 616000, description: '顧客接待費用' }
+    ],
+    fullYear: [
+      { category: '広告費', amount: 3256000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 2200000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 1628000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 1056000, description: '顧客接待費用' }
+    ]
+  },
+  2026: {
+    firstHalf: [
+      { category: '広告費', amount: 1452000, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 968000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 726000, description: '営業活動の交通費' },
+      { category: '接待費', amount: 484000, description: '顧客接待費用' }
+    ],
+    secondHalf: [
+      { category: '広告費', amount: 2129600, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 1452000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 1064800, description: '営業活動の交通費' },
+      { category: '接待費', amount: 677600, description: '顧客接待費用' }
+    ],
+    fullYear: [
+      { category: '広告費', amount: 3581600, description: 'Web広告、印刷物広告' },
+      { category: 'イベント費', amount: 2420000, description: '展示会、セミナー参加費' },
+      { category: '交通費', amount: 1790800, description: '営業活動の交通費' },
+      { category: '接待費', amount: 1161600, description: '顧客接待費用' }
+    ]
+  }
+}
+
+// 雑費予算の内訳データ
+const miscBudgetDetail = {
+  2024: {
+    firstHalf: [
+      { category: '事務用品費', amount: 180000, description: '文具、消耗品' },
+      { category: '通信費', amount: 150000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 120000, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 90000, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 60000, description: 'その他の雑費' }
+    ],
+    secondHalf: [
+      { category: '事務用品費', amount: 264000, description: '文具、消耗品' },
+      { category: '通信費', amount: 220000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 176000, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 132000, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 88000, description: 'その他の雑費' }
+    ],
+    fullYear: [
+      { category: '事務用品費', amount: 444000, description: '文具、消耗品' },
+      { category: '通信費', amount: 370000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 296000, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 222000, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 148000, description: 'その他の雑費' }
+    ]
+  },
+  2025: {
+    firstHalf: [
+      { category: '事務用品費', amount: 198000, description: '文具、消耗品' },
+      { category: '通信費', amount: 165000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 132000, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 99000, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 66000, description: 'その他の雑費' }
+    ],
+    secondHalf: [
+      { category: '事務用品費', amount: 290400, description: '文具、消耗品' },
+      { category: '通信費', amount: 242000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 193600, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 145200, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 96800, description: 'その他の雑費' }
+    ],
+    fullYear: [
+      { category: '事務用品費', amount: 488400, description: '文具、消耗品' },
+      { category: '通信費', amount: 407000, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 325600, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 244200, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 162800, description: 'その他の雑費' }
+    ]
+  },
+  2026: {
+    firstHalf: [
+      { category: '事務用品費', amount: 217800, description: '文具、消耗品' },
+      { category: '通信費', amount: 181500, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 145200, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 108900, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 72600, description: 'その他の雑費' }
+    ],
+    secondHalf: [
+      { category: '事務用品費', amount: 319440, description: '文具、消耗品' },
+      { category: '通信費', amount: 266200, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 212960, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 159720, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 106480, description: 'その他の雑費' }
+    ],
+    fullYear: [
+      { category: '事務用品費', amount: 537240, description: '文具、消耗品' },
+      { category: '通信費', amount: 447700, description: '電話、インターネット' },
+      { category: '水道光熱費', amount: 358160, description: '電気、ガス、水道' },
+      { category: '保険料', amount: 268620, description: '事務所保険、賠償責任保険' },
+      { category: 'その他', amount: 179080, description: 'その他の雑費' }
+    ]
+  }
+}
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('ja-JP', {
     style: 'currency',
@@ -402,6 +539,96 @@ export default function BudgetSummary() {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      {/* 営業予算の内訳テーブル */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-purple-200">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">営業予算の内訳</h3>
+          <p className="text-sm text-gray-600">{selectedYear}年の営業予算の詳細な内訳を確認できます</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-200 hover:border-purple-300 transition-colors duration-200">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="w-1/4 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">項目</th>
+                <th className="w-1/4 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">金額</th>
+                <th className="w-1/2 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50">説明</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
+                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    {item.category}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                    {formatCurrency(item.amount)}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">
+                    {item.description}
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-b-2 border-gray-300 bg-gray-50">
+                <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                  合計
+                </td>
+                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                  {formatCurrency(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
+                </td>
+                <td className="px-4 py-4 text-sm text-gray-700">
+                  -
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 雑費予算の内訳テーブル */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-orange-200">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">雑費予算の内訳</h3>
+          <p className="text-sm text-gray-600">{selectedYear}年の雑費予算の詳細な内訳を確認できます</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-200 hover:border-orange-300 transition-colors duration-200">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="w-1/4 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">項目</th>
+                <th className="w-1/4 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">金額</th>
+                <th className="w-1/2 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50">説明</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
+                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    {item.category}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                    {formatCurrency(item.amount)}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">
+                    {item.description}
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-b-2 border-gray-300 bg-gray-50">
+                <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                  合計
+                </td>
+                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                  {formatCurrency(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
+                </td>
+                <td className="px-4 py-4 text-sm text-gray-700">
+                  -
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

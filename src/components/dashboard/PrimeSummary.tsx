@@ -21,10 +21,57 @@ const primeData = {
   },
 }
 
+// 売上見込みデータ（年別・月別）
+const salesForecastData = {
+  2024: [
+    { month: '1月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '2月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '3月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '4月', forecast: 3000000, actual: 3000000, variance: 0, varianceRate: 0 },
+    { month: '5月', forecast: 3000000, actual: 3000000, variance: 0, varianceRate: 0 },
+    { month: '6月', forecast: 3000000, actual: 3000000, variance: 0, varianceRate: 0 },
+    { month: '7月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '8月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '9月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '10月', forecast: 4000000, actual: 4000000, variance: 0, varianceRate: 0 },
+    { month: '11月', forecast: 4000000, actual: 4000000, variance: 0, varianceRate: 0 },
+    { month: '12月', forecast: 4000000, actual: 4000000, variance: 0, varianceRate: 0 },
+  ],
+  2025: [
+    { month: '1月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '2月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '3月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '4月', forecast: 5000000, actual: 5000000, variance: 0, varianceRate: 0 },
+    { month: '5月', forecast: 5000000, actual: 5000000, variance: 0, varianceRate: 0 },
+    { month: '6月', forecast: 5000000, actual: 5000000, variance: 0, varianceRate: 0 },
+    { month: '7月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '8月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '9月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '10月', forecast: 6000000, actual: 6000000, variance: 0, varianceRate: 0 },
+    { month: '11月', forecast: 6000000, actual: 6000000, variance: 0, varianceRate: 0 },
+    { month: '12月', forecast: 6000000, actual: 6000000, variance: 0, varianceRate: 0 },
+  ],
+  2026: [
+    { month: '1月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '2月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '3月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '4月', forecast: 7000000, actual: 7000000, variance: 0, varianceRate: 0 },
+    { month: '5月', forecast: 7000000, actual: 7000000, variance: 0, varianceRate: 0 },
+    { month: '6月', forecast: 7000000, actual: 7000000, variance: 0, varianceRate: 0 },
+    { month: '7月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '8月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '9月', forecast: 0, actual: 0, variance: 0, varianceRate: 0 },
+    { month: '10月', forecast: 8000000, actual: 8000000, variance: 0, varianceRate: 0 },
+    { month: '11月', forecast: 8000000, actual: 8000000, variance: 0, varianceRate: 0 },
+    { month: '12月', forecast: 8000000, actual: 8000000, variance: 0, varianceRate: 0 },
+  ],
+}
+
 // 各期間の詳細データ - プライム事業部
 const periodDetailData = {
   '2024年上半期': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2024年4月',
     deliveryDate: '2024年6月',
     sales: 3000000,
@@ -33,10 +80,12 @@ const periodDetailData = {
     grossProfitRate: 100.0,
     assignees: {
       'PM': '田中'
-    }
+    },
+    revenueRecognitionMonth: '2024年6月'
   },
   '2024年下半期': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2024年10月',
     deliveryDate: '2024年3月',
     sales: 12000000,
@@ -49,10 +98,12 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤'
-    }
+    },
+    revenueRecognitionMonth: '2024年12月'
   },
   '2024年通年': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2024年4月',
     deliveryDate: '2024年12月',
     sales: 15000000,
@@ -65,12 +116,14 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤'
-    }
+    },
+    revenueRecognitionMonth: '2024年12月'
   },
   '2025年上半期': {
     projects: [
       {
         projectName: 'A社基幹システム開発',
+        customerName: 'A社',
         startDate: '2025年4月',
         deliveryDate: '2025年3月',
         sales: 15000000,
@@ -83,10 +136,12 @@ const periodDetailData = {
         assignees: {
           'PM': '田中',
           'メンバー': '佐藤、高橋'
-        }
+        },
+        revenueRecognitionMonth: '2025年3月'
       },
       {
         projectName: 'B社業務コンサル',
+        customerName: 'B社',
         startDate: '2025年4月',
         deliveryDate: '2025年6月',
         sales: 3000000,
@@ -94,8 +149,9 @@ const periodDetailData = {
         grossProfit: 3000000,
         grossProfitRate: 100.0,
         assignees: {
-          'PM': '田中'
-        }
+          'PM': '鈴木'
+        },
+        revenueRecognitionMonth: '2025年6月'
       }
     ]
   },
@@ -103,6 +159,7 @@ const periodDetailData = {
     projects: [
       {
         projectName: 'A社基幹システム開発',
+        customerName: 'A社',
         startDate: '2025年10月',
         deliveryDate: '2025年9月',
         sales: 15000000,
@@ -115,10 +172,12 @@ const periodDetailData = {
         assignees: {
           'PM': '田中',
           'メンバー': '佐藤、高橋、鈴木'
-        }
+        },
+        revenueRecognitionMonth: '2025年9月'
       },
       {
         projectName: 'C社○○ツール開発',
+        customerName: 'C社',
         startDate: '2025年10月',
         deliveryDate: '2025年3月',
         sales: 12000000,
@@ -131,12 +190,14 @@ const periodDetailData = {
         assignees: {
           'PM': '田中',
           'メンバー': '佐藤'
-        }
+        },
+        revenueRecognitionMonth: '2025年3月'
       }
     ]
   },
   '2025年通年': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2025年4月',
     deliveryDate: '2025年12月',
     sales: 45000000,
@@ -149,10 +210,12 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤、高橋、鈴木、山田'
-    }
+    },
+    revenueRecognitionMonth: '2025年12月'
   },
   '2026年上半期': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2026年4月',
     deliveryDate: '2026年3月',
     sales: 21000000,
@@ -165,10 +228,12 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤、高橋、鈴木'
-    }
+    },
+    revenueRecognitionMonth: '2026年3月'
   },
   '2026年下半期': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2026年10月',
     deliveryDate: '2026年9月',
     sales: 32000000,
@@ -181,10 +246,12 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤、高橋、鈴木、山田、中村'
-    }
+    },
+    revenueRecognitionMonth: '2026年9月'
   },
   '2026年通年': {
     projectName: 'A社基幹システム開発',
+    customerName: 'A社',
     startDate: '2026年4月',
     deliveryDate: '2026年12月',
     sales: 53000000,
@@ -197,7 +264,8 @@ const periodDetailData = {
     assignees: {
       'PM': '田中',
       'メンバー': '佐藤、高橋、鈴木、山田、中村'
-    }
+    },
+    revenueRecognitionMonth: '2026年12月'
   },
 }
 
@@ -511,6 +579,12 @@ export default function PrimeSummary() {
                            {project.projectName}
                          </td>
                        </tr>
+                       <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                         <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">顧客名</td>
+                         <td className="px-4 py-4 text-sm text-gray-900 font-medium">
+                           {project.customerName}
+                         </td>
+                       </tr>
                                              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                          <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">開始年月</td>
                          <td className="px-4 py-4 text-sm text-gray-900 text-left">
@@ -521,6 +595,12 @@ export default function PrimeSummary() {
                          <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">納品予定</td>
                          <td className="px-4 py-4 text-sm text-gray-900 text-left">
                            {project.deliveryDate}
+                         </td>
+                       </tr>
+                       <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                         <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">売上計上予定月</td>
+                         <td className="px-4 py-4 text-sm text-gray-900 text-left">
+                           {project.revenueRecognitionMonth}
                          </td>
                        </tr>
                        <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
@@ -587,6 +667,12 @@ export default function PrimeSummary() {
                         {selectedPeriodDetailData.projectName}
                       </td>
                     </tr>
+                    <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">顧客名</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                        {String((selectedPeriodDetailData as any).customerName || '-')}
+                      </td>
+                    </tr>
                                          <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                        <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">開始年月</td>
                        <td className="px-4 py-4 text-sm text-gray-900 text-left">
@@ -597,6 +683,12 @@ export default function PrimeSummary() {
                        <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">納品予定</td>
                        <td className="px-4 py-4 text-sm text-gray-900 text-left">
                          {selectedPeriodDetailData.deliveryDate}
+                       </td>
+                     </tr>
+                     <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                       <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">売上計上予定月</td>
+                       <td className="px-4 py-4 text-sm text-gray-900 text-left">
+                         {(selectedPeriodDetailData as any).revenueRecognitionMonth || '-'}
                        </td>
                      </tr>
                      <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
@@ -657,6 +749,97 @@ export default function PrimeSummary() {
               </tbody>
            </table>
          </div>
+      </div>
+
+      {/* 売上見込みテーブル */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-indigo-200">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-1">売上見込み vs 実績</h3>
+            <p className="text-sm text-gray-600">{selectedYear}年の月別売上見込みと実績の比較を確認できます</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <label htmlFor="forecast-year-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">年:</label>
+            <select
+              id="forecast-year-select"
+              className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm"
+              value={selectedYear}
+              onChange={e => setSelectedYear(e.target.value)}
+            >
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-200 hover:border-indigo-300 transition-colors duration-200">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="w-1/6 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">月</th>
+                <th className="w-1/6 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">売上見込み</th>
+                <th className="w-1/6 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">実績</th>
+                <th className="w-1/6 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">差異</th>
+                <th className="w-1/6 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">差異率</th>
+                <th className="w-1/6 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50">達成率</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {salesForecastData[selectedYear as '2024' | '2025' | '2026'].map((item, index) => (
+                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    {item.month}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                    {formatCurrency(item.forecast)}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                    {formatCurrency(item.actual)}
+                  </td>
+                  <td className={`px-4 py-4 text-sm text-right font-medium border-r border-gray-200 ${
+                    item.variance >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {item.variance >= 0 ? '+' : ''}{formatCurrency(item.variance)}
+                  </td>
+                  <td className={`px-4 py-4 text-sm text-right font-medium border-r border-gray-200 ${
+                    item.varianceRate >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {item.varianceRate >= 0 ? '+' : ''}{item.varianceRate}%
+                  </td>
+                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
+                    {item.forecast > 0 ? ((item.actual / item.forecast) * 100).toFixed(1) : '-'}%
+                  </td>
+                </tr>
+              ))}
+              {/* 年間合計行 */}
+              <tr className="bg-gray-50 border-t-2 border-gray-300">
+                <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">年間合計</td>
+                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                  {formatCurrency(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0))}
+                </td>
+                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                  {formatCurrency(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.actual, 0))}
+                </td>
+                <td className={`px-4 py-4 text-sm text-right font-bold border-r border-gray-200 ${
+                  salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0) >= 0 ? '+' : ''}
+                  {formatCurrency(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0))}
+                </td>
+                <td className={`px-4 py-4 text-sm text-right font-bold border-r border-gray-200 ${
+                  (salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0) / Math.max(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0), 1) * 100) >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0) / Math.max(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0), 1) * 100) >= 0 ? '+' : ''}
+                  {(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.variance, 0) / Math.max(salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0), 1) * 100).toFixed(1)}%
+                </td>
+                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900">
+                  {salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0) > 0 ? 
+                    ((salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.actual, 0) / salesForecastData[selectedYear as '2024' | '2025' | '2026'].reduce((sum, item) => sum + item.forecast, 0)) * 100).toFixed(1) : '-'}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

@@ -15,7 +15,8 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  CurrencyYenIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -23,6 +24,7 @@ const navigation = [
   { name: '案件管理', href: '/projects', icon: DocumentTextIcon },
   { name: 'シフト管理', href: '/shifts', icon: CalendarIcon },
   { name: '請求管理', href: '/billing', icon: CreditCardIcon },
+  { name: '予算管理', href: '/budget', icon: CurrencyYenIcon },
   { name: 'ユーザー管理', href: '/users', icon: UsersIcon },
   { name: '帳票出力', href: '/reports', icon: DocumentArrowDownIcon },
   { name: 'お知らせ', href: '/notifications', icon: BellIcon },
