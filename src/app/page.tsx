@@ -50,7 +50,7 @@ export default function Home() {
                   <CreditCardIcon className="w-8 h-8 text-purple-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">請求管理</h3>
-                <p className="text-gray-600 text-sm">請求書作成・申請・承認・差戻し管理</p>
+                <p className="text-gray-600 text-sm">請求書作成・申請・承認・差戻管理</p>
               </div>
             </Link>
 

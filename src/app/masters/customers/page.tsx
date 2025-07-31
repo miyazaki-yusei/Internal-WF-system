@@ -20,32 +20,32 @@ export default function CustomersPage() {
   const customers: Customer[] = [
     {
       id: '1',
-      name: '農場A株式会社',
-      code: 'FARM001',
-      type: '農業法人',
-      address: '北海道札幌市中央区1-1-1',
-      phone: '011-123-4567',
-      email: 'info@farma.co.jp',
+      name: 'コンサルファームA株式会社',
+      type: 'farm',
+      contactPerson: '田中太郎',
+      email: 'tanaka@farm-a.co.jp',
+      phone: '03-1234-5678',
+      address: '東京都渋谷区1-1-1',
       status: 'active'
     },
     {
       id: '2',
       name: 'プライム企業B',
-      code: 'PRIME001',
-      type: '製造業',
-      address: '東京都渋谷区2-2-2',
-      phone: '03-1234-5678',
-      email: 'contact@primeb.co.jp',
+      type: 'prime',
+      contactPerson: '佐藤花子',
+      email: 'sato@prime-b.co.jp',
+      phone: '03-2345-6789',
+      address: '東京都新宿区2-2-2',
       status: 'active'
     },
     {
       id: '3',
-      name: '農場C有限会社',
-      code: 'FARM002',
-      type: '農業法人',
-      address: '茨城県水戸市3-3-3',
-      phone: '029-123-4567',
-      email: 'info@farmc.co.jp',
+      name: 'コンサルファームC有限会社',
+      type: 'farm',
+      contactPerson: '山田次郎',
+      email: 'yamada@farm-c.co.jp',
+      phone: '03-3456-7890',
+      address: '東京都港区3-3-3',
       status: 'active'
     }
   ];

@@ -37,8 +37,8 @@ export default function BillingRejectPage() {
   // サンプルデータ
   const mockRejectedBilling: RejectedBilling = {
     id: '3',
-    projectName: '農場C 設備導入',
-    clientName: '農場C有限会社',
+    projectName: 'コンサルファームC 設備導入',
+    clientName: 'コンサルファームC有限会社',
     billingNumber: 'BILL-3-202401',
     amount: 200000,
     appliedAt: '2024-08-01',
@@ -49,7 +49,7 @@ export default function BillingRejectPage() {
     items: [
       {
         id: '1',
-        description: '農場C 設備導入',
+        description: 'コンサルファームC 設備導入',
         quantity: 1,
         unitPrice: 200000,
         amount: 200000

@@ -24,7 +24,7 @@ export default function ShiftsPage() {
       date: '2024-01-15',
       startTime: '09:00',
       endTime: '17:00',
-      project: '農場A システム開発',
+      project: 'コンサルファームA システム開発',
       status: 'completed'
     },
     {
@@ -42,7 +42,7 @@ export default function ShiftsPage() {
       date: '2024-01-16',
       startTime: '08:30',
       endTime: '16:30',
-      project: '農場C 設備導入',
+      project: 'コンサルファームC 設備導入',
       status: 'scheduled'
     }
   ];

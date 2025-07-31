@@ -96,8 +96,8 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
   const applications: BillingApplication[] = [
     {
       id: '1',
-      projectName: '農場A システム開発',
-      clientName: '農場A株式会社',
+      projectName: 'コンサルファームA システム開発',
+      clientName: 'コンサルファームA株式会社',
       billingNumber: 'BILL-1-202401',
       amount: 150000,
       status: 'pending',
@@ -118,15 +118,15 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
     },
     {
       id: '3',
-      projectName: '農場C 設備導入',
-      clientName: '農場C有限会社',
+      projectName: 'コンサルファームC 設備導入',
+      clientName: 'コンサルファームC有限会社',
       billingNumber: 'BILL-3-202401',
       amount: 200000,
       status: 'rejected',
       appliedAt: '2024-08-01',
       appliedBy: '山田次郎',
-      approvedBy: '経理担当者B',
-      approvedAt: '2024-10-01',
+      rejectedBy: '山田次郎',
+      rejectedAt: '2024-10-01',
       comment: '請求書の明細が不正確です。修正して再申請してください。'
     }
   ];
@@ -134,10 +134,10 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
   const projects: Project[] = [
     {
       id: '1',
-      name: '農場A システム開発',
+      name: 'コンサルファームA システム開発',
       type: 'farm',
       status: 'active',
-      client: '農場A株式会社',
+      client: 'コンサルファームA株式会社',
       amount: 150000
     },
     {
@@ -150,10 +150,10 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
     },
     {
       id: '3',
-      name: '農場C 設備導入',
+      name: 'コンサルファームC 設備導入',
       type: 'farm',
-      status: 'completed',
-      client: '農場C有限会社',
+      status: 'active',
+      client: 'コンサルファームC有限会社',
       amount: 200000
     }
   ];
@@ -169,7 +169,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
     const statusConfig = {
       pending: { text: '申請中', color: 'bg-yellow-100 text-yellow-800' },
       approved: { text: '承認済み', color: 'bg-green-100 text-green-800' },
-      rejected: { text: '差戻し', color: 'bg-red-100 text-red-800' }
+      rejected: { text: '差戻', color: 'bg-red-100 text-red-800' }
     };
     const config = statusConfig[status as keyof typeof statusConfig];
     return (
@@ -226,10 +226,10 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
 
   const handleRejectSubmit = () => {
     if (!rejectComment.trim()) {
-      alert('差戻し理由を入力してください。');
+      alert('差戻理由を入力してください。');
       return;
     }
-    console.log('差戻し:', currentApplication?.id, rejectComment);
+    console.log('差戻:', currentApplication?.id, rejectComment);
     alert('申請を差戻しました。');
     setShowRejectModal(false);
     setRejectComment('');
@@ -474,7 +474,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                           <option value="">選択</option>
                           <option value="detail">詳細確認</option>
                           <option value="approve">承認</option>
-                          <option value="reject">差戻し</option>
+                          <option value="reject">差戻</option>
                         </select>
                       </td>
                     </tr>
@@ -501,8 +501,8 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">承認・差戻し</h2>
-              <p className="text-gray-600 mt-1">申請された請求書の承認・差戻しを行います</p>
+              <h2 className="text-xl font-semibold text-gray-900">承認・差戻</h2>
+              <p className="text-gray-600 mt-1">申請された請求書の承認・差戻を行います</p>
             </div>
             <button
               onClick={() => handleCreateBilling()}
@@ -628,7 +628,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                           <option value="">選択</option>
                           <option value="detail">詳細確認</option>
                           <option value="approve">承認</option>
-                          <option value="reject">差戻し</option>
+                          <option value="reject">差戻</option>
                         </select>
                       </td>
                     </tr>
@@ -648,17 +648,17 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">差戻し理由</h2>
+                <h2 className="text-xl font-semibold text-gray-900">差戻理由</h2>
               </div>
               <div className="px-6 py-4">
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    差戻し理由 <span className="text-red-500">*</span>
+                    差戻理由 <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={rejectComment}
                     onChange={(e) => setRejectComment(e.target.value)}
-                    placeholder="差戻し理由を入力してください..."
+                    placeholder="差戻理由を入力してください..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows={4}
                     required
@@ -700,7 +700,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">差戻し案件</h2>
+              <h2 className="text-xl font-semibold text-gray-900">差戻案件</h2>
               <p className="text-gray-600 mt-1">差戻された請求書の修正・再申請を行います</p>
             </div>
             <button
@@ -732,7 +732,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
                       申請者
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      差戻し日
+                      差戻日
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       ステータス
@@ -788,7 +788,7 @@ export default function BillingManagement({ activeTab }: BillingManagementProps)
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-gray-500 text-lg">差戻し案件がありません</div>
+              <div className="text-gray-500 text-lg">差戻案件がありません</div>
             </div>
           )}
         </div>

@@ -28,14 +28,14 @@ export default function ProjectDetailPage() {
   const mockProjects: Project[] = [
     {
       id: '1',
-      name: '農場A システム開発',
+      name: 'コンサルファームA システム開発',
       type: 'farm',
       status: 'active',
-      client: '農場A株式会社',
+      client: 'コンサルファームA株式会社',
       amount: 1500000,
       startDate: '2024-01-15',
       endDate: '2024-06-30',
-      description: '農場管理システムの開発プロジェクト。生産管理、在庫管理、販売管理機能を実装。',
+      description: 'コンサルファーム管理システムの開発プロジェクト。生産管理、在庫管理、販売管理機能を実装。',
       members: ['田中太郎', '佐藤花子'],
       progress: 65
     },

@@ -19,13 +19,11 @@ export default function ProjectsPage() {
   const projects: Project[] = [
     {
       id: '1',
-      name: '農場A システム開発',
+      name: 'コンサルファームA システム開発',
       type: 'farm',
       status: 'active',
-      client: '農場A株式会社',
-      amount: 1500,
-      startDate: '2024-11-15',
-      endDate: '2024-06-30'
+      client: 'コンサルファームA株式会社',
+      amount: 150000
     },
     {
       id: '2',
@@ -33,29 +31,15 @@ export default function ProjectsPage() {
       type: 'prime',
       status: 'active',
       client: 'プライム企業B',
-      amount: 800,
-      startDate: '2024-02-01',
-      endDate: '2024-12-31'
+      amount: 80000
     },
     {
       id: '3',
-      name: '農場C 設備導入',
+      name: 'コンサルファームC 設備導入',
       type: 'farm',
-      status: 'completed',
-      client: '農場C有限会社',
-      amount: 2000,
-      startDate: '2023-10-01',
-      endDate: '2024-03-31'
-    },
-    {
-      id: '4',
-      name: 'プライム案件D システム構築',
-      type: 'prime',
-      status: 'pending',
-      client: 'プライム企業D',
-      amount: 3000,
-      startDate: '2024-04-01',
-      endDate: '2024-09-30'
+      status: 'active',
+      client: 'コンサルファームC有限会社',
+      amount: 200000
     }
   ];
 

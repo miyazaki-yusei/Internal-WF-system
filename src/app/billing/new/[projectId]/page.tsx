@@ -46,14 +46,15 @@ export default function BillingNewPage() {
   });
 
   // サンプルデータ
-  const mockProjects: Project[] = [
-    { id: '1', name: '農場A システム開発', type: 'farm', client: '農場A株式会社', amount: 1500 },
+  const projects = [
+    { id: '1', name: 'コンサルファームA システム開発', type: 'farm', client: 'コンサルファームA株式会社', amount: 1500 },
     { id: '2', name: 'プライム案件B 保守運用', type: 'prime', client: 'プライム企業B', amount: 800 },
+    { id: '3', name: 'コンサルファームC 設備導入', type: 'farm', client: 'コンサルファームC有限会社', amount: 2000 }
   ];
 
   useEffect(() => {
     const projectId = params.projectId as string;
-    const foundProject = mockProjects.find(p => p.id === projectId);
+    const foundProject = projects.find(p => p.id === projectId);
     
     if (foundProject) {
       setProject(foundProject);

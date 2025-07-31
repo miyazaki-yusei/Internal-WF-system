@@ -28,10 +28,10 @@ export default function BillingApprovePage() {
   const applications: BillingApplication[] = [
     {
       id: '1',
-      projectName: '農場A システム開発',
-      clientName: '農場A株式会社',
+      projectName: 'コンサルファームA システム開発',
+      clientName: 'コンサルファームA株式会社',
       billingNumber: 'BILL-1-202401',
-      amount: 15000,
+      amount: 150000,
       status: 'pending',
       appliedAt: '2024-01-15',
       appliedBy: '田中太郎'
@@ -41,7 +41,7 @@ export default function BillingApprovePage() {
       projectName: 'プライム案件B 保守運用',
       clientName: 'プライム企業B',
       billingNumber: 'BILL-2-202401',
-      amount: 8000,
+      amount: 80000,
       status: 'approved',
       appliedAt: '2024-01-10',
       appliedBy: '佐藤花子',
@@ -50,15 +50,15 @@ export default function BillingApprovePage() {
     },
     {
       id: '3',
-      projectName: '農場C 設備導入',
-      clientName: '農場C有限会社',
+      projectName: 'コンサルファームC 設備導入',
+      clientName: 'コンサルファームC有限会社',
       billingNumber: 'BILL-3-202401',
-      amount: 20000,
+      amount: 200000,
       status: 'rejected',
-      appliedAt: '2024-08-20',
+      appliedAt: '2024-08-01',
       appliedBy: '山田次郎',
-      approvedBy: '経理担当者B',
-      approvedAt: '2024-10-20',
+      rejectedBy: '山田次郎',
+      rejectedAt: '2024-10-01',
       comment: '請求書の明細が不正確です。修正して再申請してください。'
     }
   ];
@@ -76,7 +76,7 @@ export default function BillingApprovePage() {
     const statusConfig = {
       pending: { text: '申請中', color: 'bg-yellow-100 text-yellow-800' },
       approved: { text: '承認済み', color: 'bg-green-100 text-green-800' },
-      rejected: { text: '差戻し', color: 'bg-red-100 text-red-800' }
+      rejected: { text: '差戻', color: 'bg-red-100 text-red-800' }
     };
     const config = statusConfig[status as keyof typeof statusConfig];
     return (
@@ -120,12 +120,12 @@ export default function BillingApprovePage() {
 
   const handleRejectSubmit = () => {
     if (!rejectComment.trim()) {
-      alert('差戻し理由を入力してください。');
+      alert('差戻理由を入力してください。');
       return;
     }
 
-    // 差戻し処理
-    console.log('差戻し:', currentApplication?.id, rejectComment);
+    // 差戻処理
+    console.log('差戻:', currentApplication?.id, rejectComment);
     alert('申請を差戻しました。');
     
     setShowRejectModal(false);
@@ -138,7 +138,7 @@ export default function BillingApprovePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">経理承認</h1>
-          <p className="text-gray-600 mt-1">申請された請求書の承認・差戻しを行います</p>
+          <p className="text-gray-600 mt-1">申請された請求書の承認・差戻を行います</p>
         </div>
 
         {/* タブ */}
@@ -172,7 +172,7 @@ export default function BillingApprovePage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                差戻し ({applications.filter(app => app.status === 'rejected').length})
+                差戻 ({applications.filter(app => app.status === 'rejected').length})
               </button>
             </nav>
           </div>

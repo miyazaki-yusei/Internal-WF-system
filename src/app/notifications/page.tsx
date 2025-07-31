@@ -19,17 +19,16 @@ export default function NotificationsPage() {
   const notifications: Notification[] = [
     {
       id: '1',
-      title: 'システムメンテナンスのお知らせ',
-      message: '2024年1月20日（土）22:00〜24:00の間、システムメンテナンスを実施いたします。',
-      type: 'info',
-      date: '2024-01-15 10:00',
-      isRead: false,
-      priority: 'medium'
+      type: 'billing',
+      title: '請求書承認通知',
+      message: '案件「コンサルファームA システム開発」の請求書が承認されました。',
+      timestamp: '2024-01-15T10:30:00Z',
+      isRead: false
     },
     {
       id: '2',
       title: '請求書承認完了',
-      message: '案件「農場A システム開発」の請求書が承認されました。',
+      message: '案件「コンサルファームA システム開発」の請求書が承認されました。',
       type: 'success',
       date: '2024-01-15 09:30',
       isRead: true,

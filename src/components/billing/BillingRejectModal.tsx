@@ -14,6 +14,8 @@ interface BillingApplication {
   appliedBy: string
   approvedBy?: string
   approvedAt?: string
+  rejectedBy?: string
+  rejectedAt?: string
   comment?: string
 }
 
@@ -173,8 +175,12 @@ export default function BillingRejectModal({ isOpen, onClose, application, onSav
                   <span className="ml-2 font-medium">{formatDate(application.appliedAt)}</span>
                 </div>
                 <div>
+                  <span className="text-gray-600">差戻者:</span>
+                  <span className="ml-2 font-medium">{application.rejectedBy || '-'}</span>
+                </div>
+                <div>
                   <span className="text-gray-600">差戻日:</span>
-                  <span className="ml-2 font-medium">{application.approvedAt ? formatDate(application.approvedAt) : '-'}</span>
+                  <span className="ml-2 font-medium">{application.rejectedAt ? formatDate(application.rejectedAt) : '-'}</span>
                 </div>
               </div>
             </div>
@@ -182,7 +188,7 @@ export default function BillingRejectModal({ isOpen, onClose, application, onSav
             {/* 差戻コメント */}
             {application.comment && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 className="font-medium text-red-900 mb-2">差戻し理由</h4>
+                <h4 className="font-medium text-red-900 mb-2">差戻理由</h4>
                 <p className="text-red-800 text-sm">{application.comment}</p>
               </div>
             )}
@@ -331,21 +337,33 @@ export default function BillingRejectModal({ isOpen, onClose, application, onSav
                 </div>
               </div>
 
+              {/* 差戻理由の確認 */}
+              {application.comment && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-4 h-4 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-sm font-medium text-amber-800">差戻理由</span>
+                  </div>
+                  <p className="text-sm text-amber-700 bg-white p-2 rounded border-l-4 border-amber-300">
+                    {application.comment}
+                  </p>
+                </div>
+              )}
+
               {/* 修正コメント入力 */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  修正コメント <span className="text-gray-500">（経理コメントへのリプライ）</span>
+                  修正コメント
                 </label>
                 <textarea
                   value={correctionComment}
                   onChange={(e) => setCorrectionComment(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                  placeholder="経理からの差戻し理由に対する修正内容や対応状況を入力してください"
+                  rows={4}
+                  placeholder="差戻理由に対して、どのように修正・対応したかを説明してください"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  経理からの差戻し理由に対して、どのように修正したかを説明してください
-                </p>
               </div>
 
               <div className="flex justify-end space-x-3">

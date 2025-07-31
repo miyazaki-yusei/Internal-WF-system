@@ -194,7 +194,7 @@ export default function BillingConfirmPage() {
                     <ul className="list-disc pl-5 space-y-1">
                       <li>請求金額が正しいことを確認してください</li>
                       <li>請求項目の内容が正確であることを確認してください</li>
-                      <li>申請後は経理担当者が内容を確認し、承認または差戻しを行います</li>
+                      <li>申請後は経理担当者が内容を確認し、承認または差戻を行います</li>
                     </ul>
                   </div>
                 </div>
