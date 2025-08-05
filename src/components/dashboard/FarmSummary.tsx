@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import KPICard from '@/components/dashboard/KPICard'
 import { CurrencyYenIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, PencilIcon } from '@heroicons/react/24/outline'
 
 const kpi = {
   sales: 12000000,
@@ -646,6 +647,17 @@ export default function FarmSummary() {
   const [endMonth, setEndMonth] = useState('6月')
   const [selectedDetailMonth, setSelectedDetailMonth] = useState('4月')
   const [selectedYear, setSelectedYear] = useState('2025')
+  const [showProjectDetailModal, setShowProjectDetailModal] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [projects, setProjects] = useState<any[]>([])
+
+  // ローカルストレージからプロジェクトを読み込み
+  useEffect(() => {
+    const savedProjects = localStorage.getItem('projects')
+    if (savedProjects) {
+      setProjects(JSON.parse(savedProjects))
+    }
+  }, [])
 
   // 月の順序を定義
   const monthOrder = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
@@ -697,63 +709,66 @@ export default function FarmSummary() {
              {/* 月別集計表 */}
        <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-200">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-                         <h3 className="text-xl font-semibold text-gray-900 mb-1">月別集計表</h3>
-             <p className="text-sm text-gray-600">{startYear}年{startMonth}から{endYear}年{endMonth}までの期間を選択して月別の売上・利益を確認できます</p>
-          </div>
-                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-             <div className="flex items-center gap-3">
-               <label htmlFor="start-year" className="text-sm font-medium text-gray-700 whitespace-nowrap">開始年:</label>
-               <select
-                 id="start-year"
-                 className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                 value={startYear}
-                 onChange={e => setStartYear(e.target.value)}
-               >
-                 <option value="2024">2024</option>
-                 <option value="2025">2025</option>
-                 <option value="2026">2026</option>
-               </select>
-             </div>
-             <div className="flex items-center gap-3">
-               <label htmlFor="start-month" className="text-sm font-medium text-gray-700 whitespace-nowrap">開始月:</label>
-               <select
-                 id="start-month"
-                 className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                 value={startMonth}
-                 onChange={e => setStartMonth(e.target.value)}
-               >
-                 {monthlyData.map((item) => (
-                   <option key={item.month} value={item.month}>{item.month}</option>
-                 ))}
-               </select>
-             </div>
-                         <div className="flex items-center gap-3">
-               <label htmlFor="end-year" className="text-sm font-medium text-gray-700 whitespace-nowrap">終了年:</label>
-               <select
-                 id="end-year"
-                 className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                 value={endYear}
-                 onChange={e => setEndYear(e.target.value)}
-               >
-                 <option value="2024">2024</option>
-                 <option value="2025">2025</option>
-                 <option value="2026">2026</option>
-               </select>
-             </div>
-             <div className="flex items-center gap-3">
-               <label htmlFor="end-month" className="text-sm font-medium text-gray-700 whitespace-nowrap">終了月:</label>
-               <select
-                 id="end-month"
-                 className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                 value={endMonth}
-                 onChange={e => setEndMonth(e.target.value)}
-               >
-                 {monthlyData.map((item) => (
-                   <option key={item.month} value={item.month}>{item.month}</option>
-                 ))}
-               </select>
-             </div>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-1">ファーム集計表</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-md">{startYear}年{startMonth}から{endYear}年{endMonth}</span>
+              までの期間を選択して月別の売上・利益を確認できます
+            </p>
+            
+            {/* 期間設定エリア */}
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-900">期間設定</label>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">開始:</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={startYear}
+                      onChange={e => setStartYear(e.target.value)}
+                    >
+                      <option value="2024">2024</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                    </select>
+                    <span className="text-sm text-gray-500">年</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={startMonth}
+                      onChange={e => setStartMonth(e.target.value)}
+                    >
+                      {monthlyData.map((item) => (
+                        <option key={item.month} value={item.month}>{item.month}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">終了:</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={endYear}
+                      onChange={e => setEndYear(e.target.value)}
+                    >
+                      <option value="2024">2024</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                    </select>
+                    <span className="text-sm text-gray-500">年</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={endMonth}
+                      onChange={e => setEndMonth(e.target.value)}
+                    >
+                      {monthlyData.map((item) => (
+                        <option key={item.month} value={item.month}>{item.month}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -762,21 +777,22 @@ export default function FarmSummary() {
               <tr className="border-b-2 border-gray-300">
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">項目</th>
                                  {selectedPeriodData.map((item) => (
-                   <th key={item.month} className={`px-6 py-4 text-center text-sm font-semibold text-gray-900 border-r border-gray-200 ${
-                     item.month === selectedDetailMonth 
-                       ? 'bg-blue-50' 
-                       : 'bg-gray-50'
-                   }`}>
-                     <button
-                       className={`w-full h-full transition-all duration-200 py-2 rounded-lg font-medium cursor-pointer ${
-                         item.month === selectedDetailMonth 
-                           ? 'text-blue-700' 
-                           : 'hover:bg-blue-50 hover:text-blue-700'
-                       }`}
-                       onClick={() => setSelectedDetailMonth(item.month)}
-                     >
+                   <th 
+                     key={item.month} 
+                     className={`px-6 py-4 text-center text-sm font-semibold text-gray-900 border-r border-gray-200 transition-all duration-200 cursor-pointer ${
+                       item.month === selectedDetailMonth 
+                         ? 'bg-blue-50' 
+                         : 'bg-gray-50 hover:bg-gray-100'
+                     }`}
+                     onClick={() => setSelectedDetailMonth(item.month)}
+                   >
+                     <div className={`w-full h-full transition-all duration-200 py-2 rounded-lg font-medium ${
+                       item.month === selectedDetailMonth 
+                         ? 'text-blue-700' 
+                         : 'text-gray-900'
+                     }`}>
                        {item.month}
-                     </button>
+                     </div>
                    </th>
                  ))}
                 <th className="px-6 py-4 text-center text-sm font-bold text-gray-900 bg-gray-100">
@@ -793,7 +809,7 @@ export default function FarmSummary() {
                      className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium cursor-pointer transition-all duration-200 border-r border-gray-200 ${
                        item.month === selectedDetailMonth 
                          ? 'bg-blue-50 text-blue-700' 
-                         : 'text-gray-900 hover:bg-blue-50 hover:text-blue-700'
+                         : 'text-gray-900 hover:bg-gray-100'
                      }`}
                      onClick={() => setSelectedDetailMonth(item.month)}
                    >
@@ -812,7 +828,7 @@ export default function FarmSummary() {
                      className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium cursor-pointer transition-all duration-200 border-r border-gray-200 ${
                        item.month === selectedDetailMonth 
                          ? 'bg-blue-50 text-blue-700' 
-                         : 'text-gray-900 hover:bg-blue-50 hover:text-blue-700'
+                         : 'text-gray-900 hover:bg-gray-100'
                      }`}
                      onClick={() => setSelectedDetailMonth(item.month)}
                    >
@@ -831,7 +847,7 @@ export default function FarmSummary() {
                      className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium cursor-pointer transition-all duration-200 border-r border-gray-200 ${
                        item.month === selectedDetailMonth 
                          ? 'bg-blue-50 text-blue-700' 
-                         : 'text-gray-900 hover:bg-blue-50 hover:text-blue-700'
+                         : 'text-gray-900 hover:bg-gray-100'
                      }`}
                      onClick={() => setSelectedDetailMonth(item.month)}
                    >
@@ -850,7 +866,7 @@ export default function FarmSummary() {
                      className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium cursor-pointer transition-all duration-200 border-r border-gray-200 ${
                        item.month === selectedDetailMonth 
                          ? 'bg-blue-50 text-blue-700' 
-                         : 'text-gray-900 hover:bg-blue-50 hover:text-blue-700'
+                         : 'text-gray-900 hover:bg-gray-100'
                      }`}
                      onClick={() => setSelectedDetailMonth(item.month)}
                    >
@@ -894,18 +910,79 @@ export default function FarmSummary() {
               {selectedMonthDetailData.map((row: any, i: number) => {
                 // 複数メンバーがいる場合は展開して表示
                 if (row.memberDetails && row.memberDetails.length > 0) {
-                  return row.memberDetails.map((member: any, memberIndex: number) => (
-                    <tr key={`${i}-${memberIndex}`} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {memberIndex === 0 ? row.projectName : ''}
-                      </td>
+                                    return row.memberDetails.map((member: any, memberIndex: number) => (
+                    <tr 
+                      key={`${i}-${memberIndex}`} 
+                      className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        if (memberIndex === 0) {
+                          // ローカルストレージから対応する案件データを取得
+                          const projectData = projects.find(p => p.formData.name === row.projectName && p.type === 'farm')
+                          if (projectData) {
+                            setSelectedProject(projectData)
+                          } else {
+                            // 案件データが見つからない場合は、内訳データを使用
+                            setSelectedProject({
+                              id: `temp-${Date.now()}`,
+                              type: 'farm',
+                              formData: {
+                                name: row.projectName,
+                                customer: row.customer,
+                                startDate: '2025-04-01',
+                                deliveryDate: '',
+                                revenueMonth: '',
+                                revenue: row.sales.toString(),
+                                expenses: row.expense.toString(),
+                                laborCost: row.expense.toString(),
+                                memo: ''
+                              },
+                              teamMembers: [{
+                                id: `member-${Date.now()}`,
+                                role: 'member',
+                                name: row.assignee.join(', '),
+                                utilizationRate: row.memberDetails && row.memberDetails.length > 0 ? 
+                                  row.memberDetails[0].utilizationRate.toString() : '100',
+                                unitPrice: (row.expense / (row.memberDetails && row.memberDetails.length > 0 ? 
+                                  row.memberDetails[0].utilizationRate / 100 : 1)).toString(),
+                                incentive: '10'
+                              }],
+                              payments: row.payments ? row.payments.map((payment: any) => ({
+                                id: payment.id || `payment-${Date.now()}`,
+                                recipient: payment.recipient,
+                                item: payment.item,
+                                amount: typeof payment.amount === 'number' ? payment.amount.toString() : payment.amount
+                              })) : [{
+                                id: `payment-${Date.now()}`,
+                                recipient: row.assignee.join(', '),
+                                item: '人件費',
+                                amount: row.expense.toString()
+                              }],
+                              budgetRatio: {
+                                salesBudget: '10',
+                                miscellaneousBudget: '4',
+                                incentiveBudget: '1.8'
+                              },
+                              budgetAmounts: {
+                                salesBudgetAmount: (row.sales * 0.1).toString(),
+                                miscellaneousBudgetAmount: (row.sales * 0.04).toString(),
+                                incentiveBudgetAmount: (row.sales * 0.018).toString()
+                              }
+                            })
+                          }
+                          setShowProjectDetailModal(true)
+                        }
+                      }}
+                    >
+                                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                          {memberIndex === 0 ? row.projectName : ''}
+                        </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                         {memberIndex === 0 ? row.customer : ''}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                         {member.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200">
                         {member.utilizationRate}%
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-medium border-r border-gray-200">
@@ -943,7 +1020,71 @@ export default function FarmSummary() {
                 } else {
                   // 単一メンバーの場合
                   return (
-                    <tr key={i} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <tr 
+                      key={i} 
+                      className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        // ローカルストレージから対応する案件データを取得
+                        const projectData = projects.find(p => p.formData.name === row.projectName && p.type === 'farm')
+                        if (projectData) {
+                          setSelectedProject(projectData)
+                        } else {
+                          // 案件データが見つからない場合は、内訳データを使用
+                          setSelectedProject({
+                            id: `temp-${Date.now()}`,
+                            type: 'farm',
+                            formData: {
+                              name: row.projectName,
+                              customer: row.customer,
+                              startDate: '2025-04-01',
+                              deliveryDate: '',
+                              revenueMonth: '',
+                              revenue: row.sales.toString(),
+                              expenses: row.expense.toString(),
+                              laborCost: row.expense.toString(),
+                              memo: ''
+                            },
+                            teamMembers: row.memberDetails ? row.memberDetails.map((member: any, index: number) => ({
+                              id: `member-${Date.now()}-${index}`,
+                              role: 'member',
+                              name: member.name,
+                              utilizationRate: member.utilizationRate.toString(),
+                              unitPrice: (member.expense / (member.utilizationRate / 100)).toString(),
+                              incentive: '10'
+                            })) : [{
+                              id: `member-${Date.now()}`,
+                              role: 'member',
+                              name: row.assignee.join(', '),
+                              utilizationRate: '100',
+                              unitPrice: row.expense.toString(),
+                              incentive: '10'
+                            }],
+                            payments: row.payments ? row.payments.map((payment: any) => ({
+                              id: payment.id || `payment-${Date.now()}`,
+                              recipient: payment.recipient,
+                              item: payment.item,
+                              amount: typeof payment.amount === 'number' ? payment.amount.toString() : payment.amount
+                            })) : [{
+                              id: `payment-${Date.now()}`,
+                              recipient: row.assignee.join(', '),
+                              item: '人件費',
+                              amount: row.expense.toString()
+                            }],
+                            budgetRatio: {
+                              salesBudget: '10',
+                              miscellaneousBudget: '4',
+                              incentiveBudget: '1.8'
+                            },
+                            budgetAmounts: {
+                              salesBudgetAmount: (row.sales * 0.1).toString(),
+                              miscellaneousBudgetAmount: (row.sales * 0.04).toString(),
+                              incentiveBudgetAmount: (row.sales * 0.018).toString()
+                            }
+                          })
+                        }
+                        setShowProjectDetailModal(true)
+                      }}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                         {row.projectName}
                       </td>
@@ -953,7 +1094,7 @@ export default function FarmSummary() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                         {row.assignee.join(', ')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200">
                         {row.memberDetails && row.memberDetails.length > 0 ? 
                           row.memberDetails[0].utilizationRate : 100}%
                       </td>
@@ -1000,7 +1141,7 @@ export default function FarmSummary() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">合計</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200"></td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200"></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200">
                   {/* 合計稼働率は複数メンバーの場合は空 */}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900 border-r border-gray-200">
@@ -1114,6 +1255,241 @@ export default function FarmSummary() {
           </table>
         </div>
       </div>
+
+      {/* プロジェクト詳細モーダル */}
+      {showProjectDetailModal && selectedProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+          <div className="relative w-full max-w-4xl max-h-full">
+            <div className="relative bg-white rounded-xl shadow-2xl">
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 className="text-2xl font-bold text-gray-800">
+                  ファーム案件詳細
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => {
+                      // プロジェクトデータをローカルストレージに保存して編集ページに渡す
+                      const editData = {
+                        id: selectedProject.id || 'temp-id',
+                        type: selectedProject.type,
+                        formData: selectedProject.formData,
+                        teamMembers: selectedProject.teamMembers,
+                        payments: selectedProject.payments,
+                        budgetRatio: selectedProject.budgetRatio,
+                        budgetAmounts: selectedProject.budgetAmounts
+                      };
+                      localStorage.setItem('editProjectData', JSON.stringify(editData));
+                      
+                      // ファーム案件登録ページに遷移
+                      window.location.href = '/projects/new/farm';
+                    }}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    <PencilIcon className="w-4 h-4 mr-2" />
+                    編集
+                  </button>
+                  <button
+                    type="button"
+                    className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition-colors"
+                    onClick={() => {
+                      setShowProjectDetailModal(false);
+                      setSelectedProject(null);
+                    }}
+                  >
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-8">
+                {/* 案件情報 */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                    案件情報
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3 text-sm">
+                    <div className="flex items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700 w-24">案件名:</span>
+                      <span className="ml-3 text-gray-900">{selectedProject.formData.name}</span>
+                    </div>
+                    <div className="flex items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700 w-24">顧客名:</span>
+                      <span className="ml-3 text-gray-900">{selectedProject.formData.customer}</span>
+                    </div>
+                    <div className="flex items-center py-2">
+                      <span className="font-medium text-gray-700 w-24">案件種別:</span>
+                      <span className="ml-3 text-gray-900">ファーム案件</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* スケジュール情報 */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                    スケジュール情報
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3 text-sm">
+                    <div className="flex items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700 w-24">開始年月日:</span>
+                      <span className="ml-3 text-gray-900">{selectedProject.formData.startDate}</span>
+                    </div>
+                    {selectedProject.formData.deliveryDate && (
+                      <div className="flex items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700 w-24">納品予定日:</span>
+                        <span className="ml-3 text-gray-900">{selectedProject.formData.deliveryDate}</span>
+                      </div>
+                    )}
+                    {selectedProject.formData.revenueMonth && (
+                      <div className="flex items-center py-2">
+                        <span className="font-medium text-gray-700 w-24">売上計上予定月:</span>
+                        <span className="ml-3 text-gray-900">{selectedProject.formData.revenueMonth}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* アサイン情報 */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                    アサイン情報
+                  </h4>
+                  <div className="space-y-3">
+                    {selectedProject.teamMembers.map((member: any, index: number) => (
+                      <div key={member.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-gray-600">役割:</span>
+                            <span className="ml-2 text-gray-900">
+                              {member.role === 'leader' ? 'リーダー' : member.role === 'member' ? 'メンバー' : '外注'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">名前:</span>
+                            <span className="ml-2 text-gray-900">{member.name}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">単価:</span>
+                            <span className="ml-2 text-gray-900">{member.unitPrice}円</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">インセンティブ:</span>
+                            <span className="ml-2 text-gray-900">{member.incentive}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 財務情報 */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                    財務情報
+                  </h4>
+                  <div className="space-y-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white p-3 rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-600">売上（自動計算）:</span>
+                        <span className="ml-2 text-gray-900 font-semibold">{selectedProject.formData.revenue}円</span>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-600">労務費（概算）:</span>
+                        <span className="ml-2 text-gray-900">{selectedProject.formData.laborCost}円</span>
+                      </div>
+                    </div>
+                    
+                    {/* その他支出項目 */}
+                    {selectedProject.payments.length > 0 && (
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-600 block mb-2">その他支出項目:</span>
+                        <div className="space-y-2">
+                          {selectedProject.payments.map((payment: any, index: number) => (
+                            <div key={payment.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                              <span className="font-medium text-gray-600">{payment.item}:</span>
+                              <span className="text-gray-900">{payment.amount}円</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white p-3 rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-600">支出合計:</span>
+                        <span className="ml-2 text-gray-900 font-semibold">{selectedProject.formData.expenses}円</span>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-600">粗利:</span>
+                        <span className="ml-2 text-gray-900 font-semibold">
+                          {(parseInt(selectedProject.formData.revenue.replace(/[^\d]/g, '')) - parseInt(selectedProject.formData.expenses.replace(/[^\d]/g, ''))).toLocaleString()}円
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 予算情報 */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                    予算情報
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white p-3 rounded-lg border border-gray-200">
+                      <span className="font-medium text-gray-600">営業予算:</span>
+                      <div className="mt-1">
+                        <span className="text-gray-600">{selectedProject.budgetRatio.salesBudget}%</span>
+                        <span className="ml-2 text-gray-900">({selectedProject.budgetAmounts.salesBudgetAmount}円)</span>
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg border border-gray-200">
+                      <span className="font-medium text-gray-600">雑費予算:</span>
+                      <div className="mt-1">
+                        <span className="text-gray-600">{selectedProject.budgetRatio.miscellaneousBudget}%</span>
+                        <span className="ml-2 text-gray-900">({selectedProject.budgetAmounts.miscellaneousBudgetAmount}円)</span>
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg border border-gray-200">
+                      <span className="font-medium text-gray-600">インセンティブ予算:</span>
+                      <div className="mt-1">
+                        <span className="text-gray-600">{selectedProject.budgetRatio.incentiveBudget}%</span>
+                        <span className="ml-2 text-gray-900">({selectedProject.budgetAmounts.incentiveBudgetAmount}円)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* メモ欄 */}
+                {selectedProject.formData.memo && (
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                      メモ欄
+                    </h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200 text-sm">
+                      <span className="whitespace-pre-wrap text-gray-900">{selectedProject.formData.memo}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setShowProjectDetailModal(false);
+                    setSelectedProject(null);
+                  }}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

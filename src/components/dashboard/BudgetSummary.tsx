@@ -271,6 +271,9 @@ const formatCurrency = (value: number) => {
 export default function BudgetSummary() {
   const [selectedYear, setSelectedYear] = useState('2025')
   const [selectedPeriod, setSelectedPeriod] = useState('上半期')
+  const [timeUnit, setTimeUnit] = useState<'year' | 'month'>('year')
+  const [salesTimeUnit, setSalesTimeUnit] = useState<'year' | 'month'>('year')
+  const [miscTimeUnit, setMiscTimeUnit] = useState<'year' | 'month'>('year')
 
   // 選択された年のデータを取得
   const yearData = budgetData[selectedYear as '2024' | '2025' | '2026'] || budgetData['2025']
@@ -283,23 +286,43 @@ export default function BudgetSummary() {
     <div className="space-y-8">
       {/* 予算集計表 */}
       <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-200">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-1">売上・支出・利益・各種予算</h3>
-            <p className="text-sm text-gray-600">{selectedYear}年の上半期・下半期・通年の予算を確認できます</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label htmlFor="year-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">年:</label>
-            <select
-              id="year-select"
-              className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-              value={selectedYear}
-              onChange={e => setSelectedYear(e.target.value)}
-            >
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">予算サマリー</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-md">{selectedYear}年</span>
+            の{timeUnit === 'year' ? '上半期・下半期・通年' : '月別'}の予算を確認できます
+          </p>
+          
+          {/* 期間設定エリア */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 w-fit">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-900">期間設定</label>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">単位:</span>
+                  <select
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    value={timeUnit}
+                    onChange={e => setTimeUnit(e.target.value as 'year' | 'month')}
+                  >
+                    <option value="year">年単位</option>
+                    <option value="month">月単位</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">年:</span>
+                  <select
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    value={selectedYear}
+                    onChange={e => setSelectedYear(e.target.value)}
+                  >
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -316,237 +339,172 @@ export default function BudgetSummary() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              <tr className="border-b border-gray-200">
-                <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年上半期</td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.firstHalf.sales)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.firstHalf.expenses)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.firstHalf.grossProfit)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.firstHalf.salesBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.firstHalf.miscBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                  {formatCurrency(yearData.firstHalf.incentiveBudget)}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-200">
-                <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年下半期</td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.secondHalf.sales)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.secondHalf.expenses)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.secondHalf.grossProfit)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.secondHalf.salesBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.secondHalf.miscBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                  {formatCurrency(yearData.secondHalf.incentiveBudget)}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-200">
-                <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">通年</td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.fullYear.sales)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.fullYear.expenses)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.fullYear.grossProfit)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.fullYear.salesBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                  {formatCurrency(yearData.fullYear.miscBudget)}
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                  {formatCurrency(yearData.fullYear.incentiveBudget)}
-                </td>
-              </tr>
+              {timeUnit === 'year' ? (
+                <>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年上半期</td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.sales)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.expenses)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.grossProfit)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.salesBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.miscBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.firstHalf.incentiveBudget)}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年下半期</td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.sales)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.expenses)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.grossProfit)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.salesBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.miscBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.secondHalf.incentiveBudget)}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">通年</td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.sales)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.expenses)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.grossProfit)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.salesBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.miscBudget)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 hover:bg-gray-100 transition-all duration-200">
+                      {formatCurrency(yearData.fullYear.incentiveBudget)}
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                // 月単位の表示（上半期を6ヶ月分、下半期を6ヶ月分に分割）
+                <>
+                  {[1, 2, 3, 4, 5, 6].map(month => (
+                    <tr key={`first-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.firstHalf.sales / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.firstHalf.expenses / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.firstHalf.grossProfit / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.firstHalf.salesBudget / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.firstHalf.miscBudget / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
+                        {formatCurrency(Math.round(yearData.firstHalf.incentiveBudget / 6))}
+                      </td>
+                    </tr>
+                  ))}
+                  {[7, 8, 9, 10, 11, 12].map(month => (
+                    <tr key={`second-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.secondHalf.sales / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.secondHalf.expenses / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.secondHalf.grossProfit / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.secondHalf.salesBudget / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(yearData.secondHalf.miscBudget / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
+                        {formatCurrency(Math.round(yearData.secondHalf.incentiveBudget / 6))}
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 内訳テーブル */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-green-200">
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-1">内訳</h3>
-          <p className="text-sm text-gray-600">ファーム案件とプライム案件の詳細な予算内訳を確認できます</p>
-        </div>
-        
-        {/* ファーム案件 */}
-        <div className="mb-8">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">ファーム案件</h4>
-          <div className="overflow-x-auto">
-            <table className="w-full border border-gray-200 hover:border-green-300 transition-colors duration-200">
-              <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="w-1/5 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">期間</th>
-                  <th className="w-1/5 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">売上見込み</th>
-                  <th className="w-1/5 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">支出見込み</th>
-                  <th className="w-1/5 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">粗利</th>
-                  <th className="w-1/5 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50">インセンティブ予算</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年上半期</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].firstHalf.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].firstHalf.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].firstHalf.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].firstHalf.incentiveBudget)}
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年下半期</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].secondHalf.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].secondHalf.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].secondHalf.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].secondHalf.incentiveBudget)}
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">通年</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].fullYear.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].fullYear.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].fullYear.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.farm[selectedYear as '2024' | '2025' | '2026'].fullYear.incentiveBudget)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
 
-        {/* プライム案件 */}
-        <div>
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">プライム案件</h4>
-          <div className="overflow-x-auto">
-            <table className="w-full border border-gray-200 hover:border-green-300 transition-colors duration-200">
-              <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="w-1/7 px-4 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">期間</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">売上見込み</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">支出見込み</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">粗利</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">営業予算</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50 border-r border-gray-200">雑費予算</th>
-                  <th className="w-1/7 px-4 py-4 text-center text-sm font-semibold text-gray-900 bg-gray-50">インセンティブ予算</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年上半期</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.salesBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.miscBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].firstHalf.incentiveBudget)}
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年下半期</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.salesBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.miscBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].secondHalf.incentiveBudget)}
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">通年</td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.sales)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.expenses)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.grossProfit)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.salesBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.miscBudget)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900">
-                    {formatCurrency(detailData.prime[selectedYear as '2024' | '2025' | '2026'].fullYear.incentiveBudget)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
 
       {/* 営業予算の内訳テーブル */}
       <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-purple-200">
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-1">営業予算の内訳</h3>
-          <p className="text-sm text-gray-600">{selectedYear}年の営業予算の詳細な内訳を確認できます</p>
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-md">{selectedYear}年</span>
+            の営業予算の詳細な内訳を確認できます
+          </p>
+          
+          {/* 期間設定エリア */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 w-fit">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-900">期間設定</label>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">単位:</span>
+                  <select
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    value={salesTimeUnit}
+                    onChange={e => setSalesTimeUnit(e.target.value as 'year' | 'month')}
+                  >
+                    <option value="year">年単位</option>
+                    <option value="month">月単位</option>
+                  </select>
+                </div>
+                {salesTimeUnit === 'year' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">期間:</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={selectedPeriod}
+                      onChange={e => setSelectedPeriod(e.target.value)}
+                    >
+                      <option value="上半期">上半期</option>
+                      <option value="下半期">下半期</option>
+                      <option value="通年">通年</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border border-gray-200 hover:border-purple-300 transition-colors duration-200">
@@ -558,30 +516,71 @@ export default function BudgetSummary() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
-                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
-                    {item.category}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-700">
-                    {item.description}
-                  </td>
-                </tr>
-              ))}
-              <tr className="border-b-2 border-gray-300 bg-gray-50">
-                <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
-                  合計
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
-                  {formatCurrency(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  -
-                </td>
-              </tr>
+              {salesTimeUnit === 'year' ? (
+                <>
+                  {salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
+                    <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                        {item.category}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {item.description}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-b-2 border-gray-300 bg-gray-50">
+                    <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                      合計
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                      {formatCurrency(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-700">
+                      -
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                // 月単位の表示（上半期を6ヶ月分、下半期を6ヶ月分に分割）
+                <>
+                  {[1, 2, 3, 4, 5, 6].map(month => (
+                    <tr key={`first-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'].firstHalf.reduce((sum, item) => sum + item.amount, 0) / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        上半期の営業予算を6ヶ月で均等分割
+                      </td>
+                    </tr>
+                  ))}
+                  {[7, 8, 9, 10, 11, 12].map(month => (
+                    <tr key={`second-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'].secondHalf.reduce((sum, item) => sum + item.amount, 0) / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        下半期の営業予算を6ヶ月で均等分割
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-b-2 border-gray-300 bg-gray-50">
+                    <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                      通年合計
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                      {formatCurrency(salesBudgetDetail[selectedYear as '2024' | '2025' | '2026'].fullYear.reduce((sum, item) => sum + item.amount, 0))}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-700">
+                      -
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>
@@ -591,7 +590,44 @@ export default function BudgetSummary() {
       <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all duration-300 hover:border-orange-200">
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-1">雑費予算の内訳</h3>
-          <p className="text-sm text-gray-600">{selectedYear}年の雑費予算の詳細な内訳を確認できます</p>
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-md">{selectedYear}年</span>
+            の雑費予算の詳細な内訳を確認できます
+          </p>
+          
+          {/* 期間設定エリア */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 w-fit">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-900">期間設定</label>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">単位:</span>
+                  <select
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    value={miscTimeUnit}
+                    onChange={e => setMiscTimeUnit(e.target.value as 'year' | 'month')}
+                  >
+                    <option value="year">年単位</option>
+                    <option value="month">月単位</option>
+                  </select>
+                </div>
+                {miscTimeUnit === 'year' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">期間:</span>
+                    <select
+                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                      value={selectedPeriod}
+                      onChange={e => setSelectedPeriod(e.target.value)}
+                    >
+                      <option value="上半期">上半期</option>
+                      <option value="下半期">下半期</option>
+                      <option value="通年">通年</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border border-gray-200 hover:border-orange-300 transition-colors duration-200">
@@ -603,30 +639,71 @@ export default function BudgetSummary() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
-                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
-                    {item.category}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-700">
-                    {item.description}
-                  </td>
-                </tr>
-              ))}
-              <tr className="border-b-2 border-gray-300 bg-gray-50">
-                <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
-                  合計
-                </td>
-                <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
-                  {formatCurrency(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  -
-                </td>
-              </tr>
+              {miscTimeUnit === 'year' ? (
+                <>
+                  {miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].map((item, index) => (
+                    <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                        {item.category}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {item.description}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-b-2 border-gray-300 bg-gray-50">
+                    <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                      合計
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                      {formatCurrency(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'][periodKey as 'firstHalf' | 'secondHalf' | 'fullYear'].reduce((sum, item) => sum + item.amount, 0))}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-700">
+                      -
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                // 月単位の表示（上半期を6ヶ月分、下半期を6ヶ月分に分割）
+                <>
+                  {[1, 2, 3, 4, 5, 6].map(month => (
+                    <tr key={`first-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'].firstHalf.reduce((sum, item) => sum + item.amount, 0) / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        上半期の雑費予算を6ヶ月で均等分割
+                      </td>
+                    </tr>
+                  ))}
+                  {[7, 8, 9, 10, 11, 12].map(month => (
+                    <tr key={`second-${month}`} className="border-b border-gray-200">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">{selectedYear}年{month}月</td>
+                      <td className="px-4 py-4 text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+                        {formatCurrency(Math.round(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'].secondHalf.reduce((sum, item) => sum + item.amount, 0) / 6))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        下半期の雑費予算を6ヶ月で均等分割
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-b-2 border-gray-300 bg-gray-50">
+                    <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                      通年合計
+                    </td>
+                    <td className="px-4 py-4 text-sm text-right font-bold text-gray-900 border-r border-gray-200">
+                      {formatCurrency(miscBudgetDetail[selectedYear as '2024' | '2025' | '2026'].fullYear.reduce((sum, item) => sum + item.amount, 0))}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-700">
+                      -
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>

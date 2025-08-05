@@ -250,7 +250,9 @@ export default function NewFarmProjectPage() {
   const calculateTotalExpenses = () => {
     const laborCost = calculateLaborCost()
     const paymentAmounts = payments.reduce((total, payment) => {
-      return total + (payment.amount ? parseInt(payment.amount.replace(/[^\d]/g, '')) : 0)
+      if (!payment.amount) return total
+      const amountStr = String(payment.amount)
+      return total + parseInt(amountStr.replace(/[^\d]/g, ''))
     }, 0)
     return laborCost + paymentAmounts
   }
