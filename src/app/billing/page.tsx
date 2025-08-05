@@ -130,7 +130,7 @@ const getDepartmentName = (department: string) => {
 interface Project {
   id: string;
   name: string;
-  type: 'farm' | 'prime';
+  type: 'farm' | 'prime' | 'new';
   status: 'active' | 'completed' | 'pending';
   client: string;
   amount: number;
@@ -226,15 +226,16 @@ export default function BillingPage() {
   // タブ定義（ロール別に表示制御）
   const tabs = [
     { id: 'create', name: '請求一覧', showForAll: true },
-    { id: 'reject', name: '差戻修正', showForAll: true },
-    { id: 'approve', name: '承認・差戻', showForAll: false }, // 経理担当者のみ
+    { id: 'reject', name: '差戻一覧', showForAll: true },
+    { id: 'approve', name: '申請一覧', showForAll: false }, // 経理担当者のみ
     { id: 'pending_send', name: '送信待ち', showForAll: false } // 経理担当者のみ
   ];
 
   // サブタブ定義
   const subTabs = [
     { id: 'farm', name: 'ファーム' },
-    { id: 'prime', name: 'プライム' }
+    { id: 'prime', name: 'プライム' },
+    { id: 'new', name: '新規作成' }
   ];
 
   // サンプルデータ
@@ -381,9 +382,16 @@ export default function BillingPage() {
   };
 
   const getTypeBadge = (type: string) => {
-    const config = type === 'farm' 
-      ? { text: 'ファーム案件', color: 'bg-blue-100 text-blue-800' }
-      : { text: 'プライム案件', color: 'bg-green-100 text-green-800' };
+    let config;
+    if (type === 'farm') {
+      config = { text: 'ファーム案件', color: 'bg-blue-100 text-blue-800' };
+    } else if (type === 'prime') {
+      config = { text: 'プライム案件', color: 'bg-green-100 text-green-800' };
+    } else if (type === 'new') {
+      config = { text: '新規作成', color: 'bg-purple-100 text-purple-800' };
+    } else {
+      config = { text: 'その他', color: 'bg-gray-100 text-gray-800' };
+    }
     
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
@@ -415,7 +423,12 @@ export default function BillingPage() {
     // サブタブフィルター
     let matchesSubTab = true;
     if (activeTab === 'create') {
-      matchesSubTab = project.type === activeSubTab;
+      if (activeSubTab === 'new') {
+        // 新規作成タブの場合は、新規作成可能な案件を表示
+        matchesSubTab = project.userStatus === 'before_application';
+      } else {
+        matchesSubTab = project.type === activeSubTab;
+      }
     }
     
     return matchesProjectSearch && matchesClientSearch && matchesType && matchesStatus && matchesSubTab;
@@ -1202,6 +1215,7 @@ export default function BillingPage() {
                 <option value="all">すべて</option>
                 <option value="farm">ファーム案件</option>
                 <option value="prime">プライム案件</option>
+                <option value="new">新規作成</option>
               </select>
             </div>
           )}
@@ -1525,10 +1539,10 @@ export default function BillingPage() {
                   key={tab.id}
                   className={`px-4 py-2 rounded-t-lg font-medium border-b-2 transition-colors relative ${
                     activeTab === tab.id
-                      ? tab.id === 'approve' 
+                      ? tab.id === 'approve' || tab.id === 'pending_send'
                         ? 'border-orange-400 text-orange-600 bg-white'
                         : 'border-blue-600 text-blue-700 bg-white'
-                      : tab.id === 'approve'
+                      : tab.id === 'approve' || tab.id === 'pending_send'
                         ? 'border-transparent text-gray-500 bg-orange-50 hover:text-orange-600'
                         : 'border-transparent text-gray-500 bg-gray-100 hover:text-blue-600'
                   }`}
@@ -1579,7 +1593,7 @@ export default function BillingPage() {
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">案件選択</h2>
                     <p className="text-gray-600 mt-1">
-                      {activeSubTab === 'farm' ? 'ファーム案件' : 'プライム案件'}の請求書作成対象の案件を選択してください
+                      {activeSubTab === 'farm' ? 'ファーム案件' : activeSubTab === 'prime' ? 'プライム案件' : '新規作成'}の請求書作成対象の案件を選択してください
                     </p>
                   </div>
                   <button
