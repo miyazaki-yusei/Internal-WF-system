@@ -420,14 +420,16 @@ export default function BillingPage() {
     // ステータスフィルター（請求ステータスを使用）
     const matchesStatus = statusFilter === 'all' || project.userStatus === statusFilter;
     
-    // サブタブフィルター
+        // サブタブフィルター
     let matchesSubTab = true;
     if (activeTab === 'create') {
       if (activeSubTab === 'new') {
         // 新規作成タブの場合は、新規作成可能な案件を表示
         matchesSubTab = project.userStatus === 'before_application';
       } else {
-        matchesSubTab = project.type === activeSubTab;
+        // ファーム・プライムタブの場合は、申請前と申請済みの案件を表示
+        matchesSubTab = project.type === activeSubTab && 
+          (project.userStatus === 'before_application' || project.userStatus === 'applied');
       }
     }
     
@@ -646,6 +648,39 @@ export default function BillingPage() {
   const handleCreateBilling = (project?: Project) => {
     setSelectedProject(project || null);
     setShowBillingModal(true);
+  };
+
+  // 経理申請完了後の処理
+  const handleBillingApplicationComplete = (billingData: any) => {
+    // プロジェクトのステータスを「申請済」に変更
+    const updatedProjects = projects.map(project => {
+      if (project.id === billingData.projectId) {
+        return {
+          ...project,
+          userStatus: 'applied' as const,
+          accountingStatus: 'pending' as const
+        };
+      }
+      return project;
+    });
+    setProjects(updatedProjects);
+
+    // 申請済み案件をapplicationsに追加
+    const newApplication = {
+      id: `billing-${Date.now()}`,
+      projectName: billingData.projectName,
+      clientName: billingData.clientName,
+      billingNumber: billingData.billingNumber,
+      amount: billingData.totalAmount,
+      status: 'pending' as const,
+      appliedAt: billingData.appliedAt,
+      appliedBy: billingData.appliedBy,
+      comment: billingData.applicantComment
+    };
+    setApplications(prev => [...prev, newApplication]);
+
+    console.log('経理申請完了:', billingData);
+    alert('経理申請が完了しました。ステータスが「申請済」に変更されました。');
   };
 
   const handleCloseBillingModal = () => {
@@ -869,56 +904,8 @@ export default function BillingPage() {
 
   // 新しい業務フロー用の関数
   const handleProjectSelection = (project: Project) => {
-    if (project.type === 'prime') {
-      // プライム案件の場合：請求内容入力画面に進む
-      const today = new Date();
-      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-      
-      const defaultPrimeBillingContent = {
-        billingNumber: `INV-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}-001`,
-        billingDate: today.toISOString().split('T')[0],
-        paymentDueDate: nextMonth.toISOString().split('T')[0],
-        items: [
-          {
-            id: '1',
-            itemName: `${project.name} 業務支援報酬`,
-            unitPrice: project.amount,
-            quantity: 1,
-            amount: project.amount
-          }
-        ],
-        subtotal: project.amount,
-        taxAmount: Math.floor(project.amount * 0.1),
-        totalAmount: project.amount + Math.floor(project.amount * 0.1),
-        breakdown: 'コンサルティング報酬',
-        remarks: '本請求に関してご不明点がございましたら、お気軽にお問い合わせください。',
-        attachments: '作業報告書'
-      };
-
-      setBillingFlow({
-        step: 'prime-billing-input',
-        selectedProject: project,
-        primeBillingContent: defaultPrimeBillingContent
-      });
-    } else {
-      // ファーム案件の場合：従来のフロー
-      const defaultBillingContent = {
-        title: `${project.name} システム開発`,
-        description: `${project.name}のシステム開発業務を実施いたしました。`,
-        amount: project.amount,
-        details: ['要件定義', '設計', '開発', 'テスト', '運用支援']
-      };
-
-      const template = getEmailTemplate(project.type);
-      const emailContent = replaceTemplateVariables(template, project, defaultBillingContent);
-
-      setBillingFlow({
-        step: 'preview',
-        selectedProject: project,
-        billingContent: defaultBillingContent,
-        emailContent: emailContent
-      });
-    }
+    // モーダル形式で請求作成を開始
+    handleCreateBilling(project);
   };
 
   const handleContentConfirmation = (content: any) => {
@@ -1596,12 +1583,14 @@ export default function BillingPage() {
                       {activeSubTab === 'farm' ? 'ファーム案件' : activeSubTab === 'prime' ? 'プライム案件' : '新規作成'}の請求書作成対象の案件を選択してください
                     </p>
                   </div>
+                  {activeSubTab === 'new' && (
                   <button
                     onClick={() => setShowBillingModal(true)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
                     新規請求作成
                   </button>
+                  )}
                 </div>
 
                 {/* 検索・フィルター */}
@@ -1645,15 +1634,24 @@ export default function BillingPage() {
                       {filteredProjects.map((project) => (
                         <tr key={project.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleProjectSelection(project)}
-                              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                            >
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                              請求作成
-                            </button>
+                            {project.userStatus === 'applied' ? (
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-md">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                申請済
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleProjectSelection(project)}
+                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                              >
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                請求作成
+                              </button>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{project.name}</div>
@@ -2978,103 +2976,7 @@ Email: ${getCurrentUser().email}`}
               </div>
             )}
 
-            {/* 申請済一覧 */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">申請済一覧</h2>
-                  <p className="text-gray-600 mt-1">申請済・再申請済ステータスの請求書一覧</p>
-                </div>
-              </div>
 
-              {/* 検索・フィルター */}
-              <SearchAndFilterSection 
-                showStatusFilter={true}
-                statusOptions={[
-                  { value: 'pending', label: '申請済' },
-                  { value: 'resubmitted', label: '再申請済' }
-                ]}
-              />
-              
-              {filteredApplications.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          アクション
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          請求書番号
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          案件名
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          請求金額
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          申請者
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          申請日
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          ステータス
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleActionSelect(application, 'preview')}
-                              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                            >
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                              プレビュー
-                            </button>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {application.billingNumber}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{application.projectName}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{application.clientName}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {formatCurrency(application.amount)}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{application.appliedBy}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{formatDate(application.appliedAt)}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {getStatusBadge(application.status)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg">承認・差戻対象の請求書がありません</div>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
@@ -3348,6 +3250,7 @@ Email: ${getCurrentUser().email}`}
             onClose={handleCloseBillingModal}
             selectedProject={selectedProject}
             projects={projects}
+            onBillingApplicationComplete={handleBillingApplicationComplete}
           />
         )}
 
@@ -3759,34 +3662,7 @@ Email: ${getCurrentUser().email}`}
           </div>
         )}
 
-        {/* 請求作成モーダル */}
-        {showBillingModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">請求書作成</h3>
-                <p className="text-gray-600 mb-4">請求書作成を開始しますか？</p>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setShowBillingModal(false)}
-                    className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-                  >
-                    キャンセル
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowBillingModal(false);
-                      setBillingFlow({ step: 'project-selection' });
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    開始
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
