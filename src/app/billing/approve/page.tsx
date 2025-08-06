@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import UnifiedBillingModal from '@/components/billing/UnifiedBillingModal';
 
 interface BillingApplication {
   id: string;
@@ -14,15 +14,30 @@ interface BillingApplication {
   appliedBy: string;
   approvedBy?: string;
   approvedAt?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
   comment?: string;
+  reply?: string;
+  items?: Array<{
+    id: string;
+    summary: string;
+    unitPrice: number;
+    quantity: number;
+    amount: number;
+    remarks: string;
+  }>;
+  taxRate?: number;
+  billingDate?: string;
+  dueDate?: string;
+  notes?: string;
 }
 
 export default function BillingApprovePage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectComment, setRejectComment] = useState('');
-  const [currentApplication, setCurrentApplication] = useState<BillingApplication | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'view' | 'approve' | 'reject'>('view');
+  const [selectedApplication, setSelectedApplication] = useState<BillingApplication | null>(null);
 
   // サンプルデータ
   const applications: BillingApplication[] = [
@@ -30,11 +45,33 @@ export default function BillingApprovePage() {
       id: '1',
       projectName: 'コンサルファームA システム開発',
       clientName: 'コンサルファームA株式会社',
-      billingNumber: 'BILL-1-202401',
+      billingNumber: '202508312207',
       amount: 150000,
       status: 'pending',
       appliedAt: '2024-01-15',
-      appliedBy: '田中太郎'
+      appliedBy: '田中太郎',
+      billingDate: '2025-08-06',
+      dueDate: '2025-09-06',
+      taxRate: 10,
+      notes: 'システム開発の請求書です',
+      items: [
+        {
+          id: '1',
+          summary: 'システム設計',
+          unitPrice: 50000,
+          quantity: 2,
+          amount: 100000,
+          remarks: '基本設計・詳細設計'
+        },
+        {
+          id: '2',
+          summary: 'システム開発',
+          unitPrice: 25000,
+          quantity: 2,
+          amount: 50000,
+          remarks: 'コーディング・テスト'
+        }
+      ]
     },
     {
       id: '2',
@@ -46,7 +83,21 @@ export default function BillingApprovePage() {
       appliedAt: '2024-01-10',
       appliedBy: '佐藤花子',
       approvedBy: '経理担当者A',
-      approvedAt: '2024-01-12'
+      approvedAt: '2024-01-12',
+      billingDate: '2024-01-10',
+      dueDate: '2024-02-10',
+      taxRate: 10,
+      notes: '保守運用の請求書です',
+      items: [
+        {
+          id: '1',
+          summary: '保守運用',
+          unitPrice: 40000,
+          quantity: 2,
+          amount: 80000,
+          remarks: '月次保守・運用'
+        }
+      ]
     },
     {
       id: '3',
@@ -57,9 +108,23 @@ export default function BillingApprovePage() {
       status: 'rejected',
       appliedAt: '2024-08-01',
       appliedBy: '山田次郎',
-      rejectedBy: '山田次郎',
+      rejectedBy: '経理担当者B',
       rejectedAt: '2024-10-01',
-      comment: '請求書の明細が不正確です。修正して再申請してください。'
+      comment: '請求書の明細が不正確です。修正して再申請してください。',
+      billingDate: '2024-08-01',
+      dueDate: '2024-09-01',
+      taxRate: 10,
+      notes: '設備導入の請求書です',
+      items: [
+        {
+          id: '1',
+          summary: '設備導入',
+          unitPrice: 200000,
+          quantity: 1,
+          amount: 200000,
+          remarks: 'サーバー・ネットワーク機器'
+        }
+      ]
     }
   ];
 
@@ -103,47 +168,60 @@ export default function BillingApprovePage() {
   };
 
   const handleBulkApprove = () => {
-    if (selectedItems.length === 0) {
-      alert('承認する申請を選択してください。');
-      return;
-    }
-    
-    // 一括承認処理
     console.log('一括承認:', selectedItems);
-    alert(`${selectedItems.length}件の申請を承認しました。`);
     setSelectedItems([]);
-
-  const handleReject = (application: BillingApplication) => {
-    setCurrentApplication(application);
-    setShowRejectModal(true);
   };
 
-  const handleRejectSubmit = () => {
-    if (!rejectComment.trim()) {
-      alert('差戻理由を入力してください。');
-      return;
-    }
+  const handleBulkReject = () => {
+    console.log('一括差戻:', selectedItems);
+    setSelectedItems([]);
+  };
 
-    // 差戻処理
-    console.log('差戻:', currentApplication?.id, rejectComment);
-    alert('申請を差戻しました。');
-    
-    setShowRejectModal(false);
-    setRejectComment('');
-    setCurrentApplication(null);
+  const handleAction = (application: BillingApplication, action: 'detail' | 'approve' | 'reject') => {
+    setSelectedApplication(application);
+    switch (action) {
+      case 'detail':
+        setModalMode('view');
+        break;
+      case 'approve':
+        setModalMode('approve');
+        break;
+      case 'reject':
+        setModalMode('reject');
+        break;
+    }
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedApplication(null);
+  };
+
+  const handleApprove = (id: string, comment?: string) => {
+    console.log('承認:', id, comment);
+    // 承認処理のロジック
+    handleCloseModal();
+  };
+
+  const handleReject = (id: string, comment: string) => {
+    console.log('差戻:', id, comment);
+    // 差戻処理のロジック
+    handleCloseModal();
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">経理承認</h1>
-          <p className="text-gray-600 mt-1">申請された請求書の承認・差戻を行います</p>
+          <h1 className="text-3xl font-bold text-gray-900">請求承認</h1>
+          <p className="text-gray-600 mt-1">請求書の承認・差戻を管理できます</p>
         </div>
 
         {/* タブ */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
-            <nav className="flex -mb-px space-x-8 px-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
               <button
                 onClick={() => setActiveTab('pending')}
                 className={`py-4 -mb-px border-b-2 font-medium text-sm ${
@@ -152,7 +230,7 @@ export default function BillingApprovePage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                申請中 ({applications.filter(app => app.status === 'pending').length})
+                承認待ち ({applications.filter(app => app.status === 'pending').length})
               </button>
               <button
                 onClick={() => setActiveTab('approved')}
@@ -198,12 +276,20 @@ export default function BillingApprovePage() {
                   )}
                 </div>
                 {selectedItems.length > 0 && (
-                  <button
-                    onClick={handleBulkApprove}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                  >
-                    一括承認
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleBulkApprove}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      一括承認
+                    </button>
+                    <button
+                      onClick={handleBulkReject}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      一括差戻
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -224,9 +310,6 @@ export default function BillingApprovePage() {
                       />
                     </th>
                   )}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    請求書番号
-                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     案件名
                   </th>
@@ -265,11 +348,8 @@ export default function BillingApprovePage() {
                     )}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {application.billingNumber}
+                        {application.projectName}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{application.projectName}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{application.clientName}</div>
@@ -290,16 +370,22 @@ export default function BillingApprovePage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
+                        <button 
+                          onClick={() => handleAction(application, 'detail')}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
                           詳細
                         </button>
                         {activeTab === 'pending' && (
                           <>
-                            <button className="text-green-600 hover:text-green-900">
+                            <button 
+                              onClick={() => handleAction(application, 'approve')}
+                              className="text-green-600 hover:text-green-900"
+                            >
                               承認
                             </button>
                             <button 
-                              onClick={() => handleReject(application)}
+                              onClick={() => handleAction(application, 'reject')}
                               className="text-red-600 hover:text-red-900"
                             >
                               差戻し
@@ -321,50 +407,15 @@ export default function BillingApprovePage() {
           </div>
         )}
 
-        {/* 差戻しモーダル */}
-        {showRejectModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">差戻し理由</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    差戻し理由 <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={rejectComment}
-                    onChange={(e) => setRejectComment(e.target.value)}
-                    placeholder="差戻し理由を入力してください..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows={4}
-                    required
-                  />
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => {
-                      setShowRejectModal(false);
-                      setRejectComment('');
-                      setCurrentApplication(null);
-                    }}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                  >
-                    キャンセル
-                  </button>
-                  <button
-                    onClick={handleRejectSubmit}
-                    disabled={!rejectComment.trim()}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    差戻し
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 統一モーダル */}
+        <UnifiedBillingModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          mode={modalMode}
+          billing={selectedApplication}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
       </div>
     </div>
   );

@@ -1,389 +1,507 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import React, { useState, useEffect } from 'react';
 
-interface BillingApplication {
-  id: string
-  projectName: string
-  clientName: string
-  billingNumber: string
-  amount: number
-  status: 'pending' | 'approved' | 'rejected' | 'resubmitted'
-  appliedAt: string
-  appliedBy: string
-  approvedBy?: string
-  approvedAt?: string
-  rejectedBy?: string
-  rejectedAt?: string
-  comment?: string
+interface BillingItem {
+  id: string;
+  summary: string;
+  unitPrice: number;
+  quantity: number;
+  amount: number;
+  remarks: string;
 }
 
 interface BillingRejectModalProps {
-  isOpen: boolean
-  onClose: () => void
-  application: BillingApplication
-  onSave: (application: BillingApplication, updatedContent: any) => void
+  isOpen: boolean;
+  onClose: () => void;
+  billingData: {
+    id: string;
+    projectName: string;
+    clientName: string;
+    billingNumber: string;
+    amount: number;
+    status: string;
+    appliedAt: string;
+    appliedBy: string;
+    comment?: string;
+    // 請求詳細データ
+    billingDate?: string;
+    dueDate?: string;
+    items?: BillingItem[];
+    taxRate?: number;
+    subtotal?: number;
+    taxAmount?: number;
+    totalAmount?: number;
+    emailContent?: {
+      subject: string;
+      body: string;
+      to: string;
+      cc?: string;
+    };
+  };
+  onSave: (updatedData: any) => void;
 }
 
-export default function BillingRejectModal({ isOpen, onClose, application, onSave }: BillingRejectModalProps) {
+export default function BillingRejectModal({
+  isOpen,
+  onClose,
+  billingData,
+  onSave
+}: BillingRejectModalProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    amount: application.amount,
-    details: [] as string[]
-  })
+    billingNumber: billingData?.billingNumber || '',
+    billingDate: billingData?.billingDate || '',
+    dueDate: billingData?.dueDate || '',
+    items: billingData?.items || [{ id: '1', summary: '', unitPrice: 0, quantity: 1, amount: 0, remarks: '' }],
+    taxRate: billingData?.taxRate || 10,
+    subtotal: billingData?.subtotal || 0,
+    taxAmount: billingData?.taxAmount || 0,
+    totalAmount: billingData?.totalAmount || 0,
+    emailContent: billingData?.emailContent || {
+      subject: '',
+      body: '',
+      to: '',
+      cc: ''
+    },
+    comment: billingData?.comment || ''
+  });
 
-  const [correctionComment, setCorrectionComment] = useState('')
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [activeTab, setActiveTab] = useState<'billing' | 'email'>('billing');
 
   useEffect(() => {
-    if (application) {
+    if (isOpen && billingData) {
       setFormData({
-        title: `${application.projectName} システム開発`,
-        description: `${application.projectName}のシステム開発業務を実施いたしました。`,
-        amount: application.amount,
-        details: ['要件定義', '設計', '開発', 'テスト', '運用支援']
-      })
+        billingNumber: billingData.billingNumber || '',
+        billingDate: billingData.billingDate || '',
+        dueDate: billingData.dueDate || '',
+        items: billingData.items || [{ id: '1', summary: '', unitPrice: 0, quantity: 1, amount: 0, remarks: '' }],
+        taxRate: billingData.taxRate || 10,
+        subtotal: billingData.subtotal || 0,
+        taxAmount: billingData.taxAmount || 0,
+        totalAmount: billingData.totalAmount || 0,
+        emailContent: billingData.emailContent || {
+          subject: '',
+          body: '',
+          to: '',
+          cc: ''
+        },
+        comment: billingData.comment || ''
+      });
     }
-  }, [application])
+  }, [isOpen, billingData]);
 
-  const handleInputChange = (field: string, value: string | number | string[]) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
-    }))
+    }));
+  };
 
-    // エラーをクリア
-    if (errors[field]) {
-      setErrors(prev => ({
+  const calculateItemAmount = (item: BillingItem) => {
+    return item.unitPrice * item.quantity;
+  };
+
+  const calculateSubtotal = () => {
+    return formData.items.reduce((sum, item) => sum + calculateItemAmount(item), 0);
+  };
+
+  const calculateTaxAmount = () => {
+    return Math.round(calculateSubtotal() * (formData.taxRate / 100));
+  };
+
+  const calculateTotalAmount = () => {
+    return calculateSubtotal() + calculateTaxAmount();
+  };
+
+  const addBillingItem = () => {
+    const newItem: BillingItem = {
+      id: Date.now().toString(),
+      summary: '',
+      unitPrice: 0,
+      quantity: 1,
+      amount: 0,
+      remarks: ''
+    };
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }));
+  };
+
+  const removeBillingItem = (itemId: string) => {
+    if (formData.items.length > 1) {
+      setFormData(prev => ({
         ...prev,
-        [field]: ''
-      }))
+        items: prev.items.filter(item => item.id !== itemId)
+      }));
     }
-  }
+  };
 
-  const handleDetailChange = (index: number, value: string) => {
-    const newDetails = [...formData.details]
-    newDetails[index] = value
-    handleInputChange('details', newDetails)
-  }
-
-  const addDetail = () => {
-    handleInputChange('details', [...formData.details, ''])
-  }
-
-  const removeDetail = (index: number) => {
-    const newDetails = formData.details.filter((_, i) => i !== index)
-    handleInputChange('details', newDetails)
-  }
-
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {}
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'タイトルは必須です'
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = '詳細は必須です'
-    }
-
-    if (formData.amount <= 0) {
-      newErrors.amount = '金額は0より大きい値を入力してください'
-    }
-
-    if (formData.details.length === 0) {
-      newErrors.details = '実施内容は最低1つ入力してください'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const updateBillingItem = (itemId: string, field: keyof BillingItem, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item => {
+        if (item.id === itemId) {
+          const updatedItem = { ...item, [field]: value };
+          if (field === 'unitPrice' || field === 'quantity') {
+            updatedItem.amount = calculateItemAmount(updatedItem);
+          }
+          return updatedItem;
+        }
+        return item;
+      })
+    }));
+  };
 
   const handleSave = () => {
-    if (validateForm()) {
-      setShowConfirmModal(true)
-    }
-  }
-
-  const handleClose = () => {
-    setCorrectionComment('')
-    onClose()
-  }
-
-  const handleConfirmSave = () => {
-    onSave(application, { ...formData, correctionComment })
-    setShowConfirmModal(false)
-    onClose()
-  }
+    if (!billingData) return;
+    
+    const updatedData = {
+      ...billingData,
+      ...formData,
+      subtotal: calculateSubtotal(),
+      taxAmount: calculateTaxAmount(),
+      totalAmount: calculateTotalAmount()
+    };
+    onSave(updatedData);
+    onClose();
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY'
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('ja-JP')
-  }
-
-  if (!isOpen) return null
+  if (!isOpen || !billingData) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div className="relative top-10 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-medium text-gray-900">請求書修正</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">請求書修正</h2>
             <button
-              onClick={handleClose}
+              onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="px-6 py-4">
+          {/* タブナビゲーション */}
+          <div className="flex border-b border-gray-200 mb-6">
+            <button
+              onClick={() => setActiveTab('billing')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                activeTab === 'billing'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              請求詳細
+            </button>
+            <button
+              onClick={() => setActiveTab('email')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                activeTab === 'email'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              メール内容
             </button>
           </div>
 
-          <div className="space-y-6">
-            {/* 請求書情報 */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-3">請求書情報</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">請求書番号:</span>
-                  <span className="ml-2 font-medium">{application.billingNumber}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">案件名:</span>
-                  <span className="ml-2 font-medium">{application.projectName}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">クライアント:</span>
-                  <span className="ml-2 font-medium">{application.clientName}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">申請者:</span>
-                  <span className="ml-2 font-medium">{application.appliedBy}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">申請日:</span>
-                  <span className="ml-2 font-medium">{formatDate(application.appliedAt)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">差戻者:</span>
-                  <span className="ml-2 font-medium">{application.rejectedBy || '-'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">差戻日:</span>
-                  <span className="ml-2 font-medium">{application.rejectedAt ? formatDate(application.rejectedAt) : '-'}</span>
+          {/* 請求詳細タブ */}
+          {activeTab === 'billing' && (
+            <div className="space-y-6">
+              {/* 基本情報 */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">基本情報</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      請求書番号
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.billingNumber}
+                      onChange={(e) => handleInputChange('billingNumber', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      請求日
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.billingDate}
+                      onChange={(e) => handleInputChange('billingDate', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      支払期限
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.dueDate}
+                      onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* 差戻コメント */}
-            {application.comment && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 className="font-medium text-red-900 mb-2">差戻理由</h4>
-                <p className="text-red-800 text-sm">{application.comment}</p>
-              </div>
-            )}
-
-            {/* 請求内容修正 */}
-            <div className="space-y-4">
-              <h4 className="font-medium text-gray-900">請求内容修正</h4>
-              
+              {/* 請求項目 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  タイトル <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.title ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="請求書のタイトルを入力"
-                />
-                {errors.title && (
-                  <p className="text-red-500 text-xs mt-1">{errors.title}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  詳細 <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows={4}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="請求内容の詳細を入力"
-                />
-                {errors.description && (
-                  <p className="text-red-500 text-xs mt-1">{errors.description}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  請求金額 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={formData.amount}
-                  onChange={(e) => handleInputChange('amount', parseInt(e.target.value) || 0)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.amount ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="0"
-                />
-                {errors.amount && (
-                  <p className="text-red-500 text-xs mt-1">{errors.amount}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  実施内容 <span className="text-red-500">*</span>
-                </label>
-                <div className="space-y-2">
-                  {formData.details.map((detail, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        value={detail}
-                        onChange={(e) => handleDetailChange(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder={`実施内容 ${index + 1}`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeDetail(index)}
-                        className="px-2 py-2 text-red-600 hover:text-red-800"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">請求項目</h3>
                   <button
                     type="button"
-                    onClick={addDetail}
-                    className="px-3 py-2 text-blue-600 hover:text-blue-800 text-sm"
+                    onClick={addBillingItem}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    + 実施内容を追加
+                    項目を追加
                   </button>
                 </div>
-                {errors.details && (
-                  <p className="text-red-500 text-xs mt-1">{errors.details}</p>
-                )}
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full border border-gray-300">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">摘要</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">単価</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">数量</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">金額</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">備考</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium text-gray-700">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formData.items.map((item, index) => (
+                        <tr key={item.id}>
+                          <td className="border border-gray-300 px-3 py-2">
+                            <input
+                              type="text"
+                              value={item.summary}
+                              onChange={(e) => updateBillingItem(item.id, 'summary', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              placeholder="摘要を入力"
+                            />
+                          </td>
+                          <td className="border border-gray-300 px-3 py-2">
+                            <input
+                              type="number"
+                              value={item.unitPrice}
+                              onChange={(e) => updateBillingItem(item.id, 'unitPrice', Number(e.target.value))}
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              placeholder="0"
+                            />
+                          </td>
+                          <td className="border border-gray-300 px-3 py-2">
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateBillingItem(item.id, 'quantity', Number(e.target.value))}
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              placeholder="1"
+                            />
+                          </td>
+                          <td className="border border-gray-300 px-3 py-2">
+                            <input
+                              type="number"
+                              value={item.amount}
+                              className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-50"
+                              readOnly
+                            />
+                          </td>
+                          <td className="border border-gray-300 px-3 py-2">
+                            <input
+                              type="text"
+                              value={item.remarks}
+                              onChange={(e) => updateBillingItem(item.id, 'remarks', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              placeholder="備考"
+                            />
+                          </td>
+                          <td className="border border-gray-300 px-3 py-2">
+                            {formData.items.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeBillingItem(item.id)}
+                                className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                              >
+                                削除
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 税区分・合計 */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">税区分・合計</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      税区分 (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.taxRate}
+                      onChange={(e) => handleInputChange('taxRate', Number(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      小計
+                    </label>
+                    <div className="px-3 py-2 bg-white border border-gray-300 rounded-md">
+                      {formatCurrency(calculateSubtotal())}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      消費税
+                    </label>
+                    <div className="px-3 py-2 bg-white border border-gray-300 rounded-md">
+                      {formatCurrency(calculateTaxAmount())}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      合計
+                    </label>
+                    <div className="px-3 py-2 bg-white border border-gray-300 rounded-md font-medium">
+                      {formatCurrency(calculateTotalAmount())}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
 
-            {/* アクションボタン */}
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-              >
-                経理再申請
-              </button>
+          {/* メール内容タブ */}
+          {activeTab === 'email' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    件名
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.emailContent.subject}
+                    onChange={(e) => handleInputChange('emailContent', {
+                      ...formData.emailContent,
+                      subject: e.target.value
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    宛先
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.emailContent.to}
+                    onChange={(e) => handleInputChange('emailContent', {
+                      ...formData.emailContent,
+                      to: e.target.value
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  CC
+                </label>
+                <input
+                  type="email"
+                  value={formData.emailContent.cc || ''}
+                  onChange={(e) => handleInputChange('emailContent', {
+                    ...formData.emailContent,
+                    cc: e.target.value
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  本文
+                </label>
+                <textarea
+                  value={formData.emailContent.body}
+                  onChange={(e) => handleInputChange('emailContent', {
+                    ...formData.emailContent,
+                    body: e.target.value
+                  })}
+                  rows={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
+          )}
+
+          {/* 経理からのコメント */}
+          {billingData.comment && (
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                経理からのコメント
+              </label>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 text-sm">{billingData.comment}</p>
+              </div>
+            </div>
+          )}
+
+          {/* 申請者コメント */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              申請者コメント
+            </label>
+            <textarea
+              value={formData.comment}
+              onChange={(e) => handleInputChange('comment', e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="修正内容やコメントがあれば入力してください"
+            />
+          </div>
+
+          {/* ボタン */}
+          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              修正を保存
+            </button>
           </div>
         </div>
       </div>
-
-      {/* 最終確認モーダル */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">経理再申請確認</h3>
-              <p className="text-gray-600 mb-4">
-                請求書「{application.billingNumber}」を修正して経理に再申請しますか？
-              </p>
-              
-              <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">修正内容</h4>
-                <div className="space-y-1 text-sm">
-                  <div>
-                    <span className="text-gray-600">タイトル:</span>
-                    <span className="ml-2 font-medium">{formData.title}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">金額:</span>
-                    <span className="ml-2 font-medium">{formatCurrency(formData.amount)}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">実施内容:</span>
-                    <span className="ml-2 font-medium">{formData.details.length}項目</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 差戻理由の確認 */}
-              {application.comment && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <svg className="w-4 h-4 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <span className="text-sm font-medium text-amber-800">差戻理由</span>
-                  </div>
-                  <p className="text-sm text-amber-700 bg-white p-2 rounded border-l-4 border-amber-300">
-                    {application.comment}
-                  </p>
-                </div>
-              )}
-
-              {/* 修正コメント入力 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  修正コメント
-                </label>
-                <textarea
-                  value={correctionComment}
-                  onChange={(e) => setCorrectionComment(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  rows={4}
-                  placeholder="差戻理由に対して、どのように修正・対応したかを説明してください"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-                >
-                  いいえ
-                </button>
-                <button
-                  onClick={handleConfirmSave}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  はい
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
+    </div>
+  );
 } 

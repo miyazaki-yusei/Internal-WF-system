@@ -5,6 +5,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import BillingCreateModal from '@/components/billing/BillingCreateModal';
 import BillingRejectModal from '@/components/billing/BillingRejectModal';
+import UnifiedBillingModal from '@/components/billing/UnifiedBillingModal';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useEmailTemplates } from '@/contexts/EmailTemplateContext';
 
@@ -205,6 +206,10 @@ export default function BillingPage() {
   const [rejectComment, setRejectComment] = useState('');
   const [showBillingRejectModal, setShowBillingRejectModal] = useState(false);
   const [selectedRejectedBilling, setSelectedRejectedBilling] = useState<BillingApplication | null>(null);
+  const [showUnifiedModal, setShowUnifiedModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit' | 'approve' | 'reject'>('create');
+  const [selectedBilling, setSelectedBilling] = useState<BillingApplication | null>(null);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [showFinalPreviewModal, setShowFinalPreviewModal] = useState(false);
   const [finalPreviewApplication, setFinalPreviewApplication] = useState<BillingApplication | null>(null);
   const [finalBillingContent, setFinalBillingContent] = useState<any>(null);
@@ -689,20 +694,51 @@ export default function BillingPage() {
   };
 
   const handleRejectBilling = (application: BillingApplication) => {
-    setSelectedRejectedBilling(application);
+    // 請求詳細データを準備
+    const billingData = {
+      ...application,
+      billingDate: application.appliedAt.split('T')[0], // 申請日を請求日として使用
+      dueDate: new Date(new Date(application.appliedAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30日後を支払期限として設定
+      items: [
+        {
+          id: '1',
+          summary: 'システム開発費',
+          unitPrice: application.amount,
+          quantity: 1,
+          amount: application.amount,
+          remarks: ''
+        }
+      ],
+      taxRate: 10,
+      subtotal: application.amount,
+      taxAmount: Math.round(application.amount * 0.1),
+      totalAmount: application.amount + Math.round(application.amount * 0.1),
+      emailContent: {
+        subject: `${application.projectName} 請求書`,
+        body: `${application.clientName}様\n\n${application.projectName}の請求書をお送りいたします。\n\nご確認のほどよろしくお願いいたします。`,
+        to: 'client@example.com',
+        cc: ''
+      },
+      // 経理からのコメントを保持
+      comment: application.comment
+    };
+    setSelectedRejectedBilling(billingData);
     setShowBillingRejectModal(true);
   };
 
-  const handleRejectBillingSave = (application: BillingApplication, updatedContent: any) => {
+  const handleRejectBillingSave = (updatedData: any) => {
     // 差戻修正保存処理
     
     // ステータスを再申請済に変更
     const updatedApplications = applications.map(app => 
-      app.id === application.id 
+      app.id === updatedData.id 
         ? { 
             ...app, 
             status: 'resubmitted' as const,
-            comment: updatedContent.correctionComment
+            comment: updatedData.comment,
+            // 更新された請求データを保存
+            billingNumber: updatedData.billingNumber,
+            amount: updatedData.totalAmount
           }
         : app
     );
@@ -718,6 +754,11 @@ export default function BillingPage() {
   const handleCloseRejectModal = () => {
     setShowBillingRejectModal(false);
     setSelectedRejectedBilling(null);
+  };
+
+  const handleCloseUnifiedModal = () => {
+    setShowUnifiedModal(false);
+    setSelectedBilling(null);
   };
 
   // 最終プレビュー関連の関数
@@ -3243,24 +3284,91 @@ Email: ${getCurrentUser().email}`}
           </div>
         )}
 
-        {/* モーダル */}
-        {showBillingModal && (
-          <BillingCreateModal
-            isOpen={showBillingModal}
-            onClose={handleCloseBillingModal}
-            selectedProject={selectedProject}
-            projects={projects}
-            onBillingApplicationComplete={handleBillingApplicationComplete}
-          />
-        )}
+        {/* 請求書作成モーダル */}
+        <BillingCreateModal
+          isOpen={showBillingModal}
+          onClose={handleCloseBillingModal}
+          selectedProject={selectedProject}
+          projects={projects}
+          onBillingApplicationComplete={handleBillingApplicationComplete}
+        />
 
-        {showBillingRejectModal && selectedRejectedBilling && (
-          <BillingRejectModal
-            isOpen={showBillingRejectModal}
-            onClose={handleCloseRejectModal}
-            application={selectedRejectedBilling}
-            onSave={handleRejectBillingSave}
-          />
+        {/* 修正・再申請モーダル */}
+        <BillingRejectModal
+          isOpen={showBillingRejectModal}
+          onClose={handleCloseRejectModal}
+          billingData={selectedRejectedBilling}
+          onSave={handleRejectBillingSave}
+        />
+
+        {/* 統一モーダル */}
+        <UnifiedBillingModal
+          isOpen={showUnifiedModal}
+          onClose={handleCloseUnifiedModal}
+          mode={modalMode}
+          billing={selectedBilling}
+          onSubmit={handleRejectBillingSave}
+        />
+
+        {/* メールプレビューモーダル */}
+        {showEmailPreview && previewApplication && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
+            <div className="relative top-20 mx-auto p-6 border w-10/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-medium text-gray-900">メールプレビュー</h3>
+                <button
+                  onClick={() => setShowEmailPreview(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* メール情報 */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">メール情報</h4>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">件名:</span>
+                      <span className="ml-2 font-medium">{previewApplication.projectName} 請求書</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">宛先:</span>
+                      <span className="ml-2 font-medium">client@example.com</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">CC:</span>
+                      <span className="ml-2 font-medium">-</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* メール本文 */}
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-900 mb-2">メール本文</h4>
+                  <div className="bg-white border rounded-lg p-4 min-h-64">
+                    <div className="text-gray-800 whitespace-pre-wrap text-sm">
+                      {previewApplication.clientName}様
+
+                      {previewApplication.projectName}の請求書をお送りいたします。
+
+                      請求書番号: {previewApplication.billingNumber}
+                      請求金額: {formatCurrency(previewApplication.amount)}
+
+                      ご確認のほどよろしくお願いいたします。
+
+                      --
+                      株式会社フェスタル
+                      営業部
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* プレビューモーダル */}
@@ -3321,6 +3429,14 @@ Email: ${getCurrentUser().email}`}
                   </div>
                 </div>
 
+                {/* 申請者コメント */}
+                {previewApplication.comment && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-2">申請者コメント</h4>
+                    <p className="text-gray-800 text-sm">{previewApplication.comment}</p>
+                  </div>
+                )}
+
                 {/* 修正コメント（再申請済の場合） */}
                 {previewApplication.status === 'resubmitted' && previewApplication.comment && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -3331,7 +3447,18 @@ Email: ${getCurrentUser().email}`}
 
                 {/* PDFプレビューエリア */}
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">PDFプレビュー</h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-gray-900">PDFプレビュー</h4>
+                    <button
+                      onClick={() => setShowEmailPreview(true)}
+                      className="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      メールプレビュー
+                    </button>
+                  </div>
                   <div className="bg-white border rounded-lg p-6 min-h-96">
                     <div className="text-center text-gray-500">
                       <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -3,59 +3,72 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import UnifiedBillingModal from '@/components/billing/UnifiedBillingModal';
 
-interface RejectedBilling {
+interface BillingApplication {
   id: string;
   projectName: string;
   clientName: string;
   billingNumber: string;
   amount: number;
+  status: 'pending' | 'approved' | 'rejected';
   appliedAt: string;
   appliedBy: string;
-  rejectedAt: string;
-  rejectedBy: string;
-  rejectComment: string;
-  items: BillingItem[];
-  remarks: string;
-}
-
-interface BillingItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  amount: number;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  comment?: string;
+  reply?: string;
+  items?: Array<{
+    id: string;
+    summary: string;
+    unitPrice: number;
+    quantity: number;
+    amount: number;
+    remarks: string;
+  }>;
+  taxRate?: number;
+  billingDate?: string;
+  dueDate?: string;
+  notes?: string;
 }
 
 export default function BillingRejectPage() {
   const params = useParams();
   const router = useRouter();
-  const [billing, setBilling] = useState<RejectedBilling | null>(null);
+  const [billing, setBilling] = useState<BillingApplication | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [reply, setReply] = useState('');
 
   // サンプルデータ
-  const mockRejectedBilling: RejectedBilling = {
+  const mockRejectedBilling: BillingApplication = {
     id: '3',
     projectName: 'コンサルファームC 設備導入',
     clientName: 'コンサルファームC有限会社',
     billingNumber: 'BILL-3-202401',
     amount: 200000,
+    status: 'rejected',
     appliedAt: '2024-08-01',
     appliedBy: '山田次郎',
     rejectedAt: '2024-10-01',
     rejectedBy: '経理担当者B',
-    rejectComment: '請求書の明細が不正確です。修正して再申請してください。',
+    comment: '請求書の明細が不正確です。修正して再申請してください。',
+    billingDate: '2024-08-01',
+    dueDate: '2024-09-01',
+    taxRate: 10,
+    notes: '設備導入に関する請求書です。',
     items: [
       {
         id: '1',
-        description: 'コンサルファームC 設備導入',
-        quantity: 1,
+        summary: '設備導入',
         unitPrice: 200000,
-        amount: 200000
+        quantity: 1,
+        amount: 200000,
+        remarks: 'サーバー・ネットワーク機器'
       }
-    ],
-    remarks: '設備導入に関する請求書です。'
+    ]
   };
 
   useEffect(() => {
@@ -74,32 +87,32 @@ export default function BillingRejectPage() {
     }).format(amount);
   };
 
-  const updateItem = (index: number, field: keyof BillingItem, value: any) => {
-    if (!billing) return;
-    
-    const newItems = [...billing.items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    
-    // 金額を再計算
-    newItems[index].amount = newItems[index].quantity * newItems[index].unitPrice;
-    
-    const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
-    setBilling(prev => prev ? {
-      ...prev,
-      items: newItems,
-      amount: totalAmount
-    } : null);
+  const handleEdit = () => {
+    setShowModal(true);
   };
 
-  const handleSubmit = () => {
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleSubmit = (data: any) => {
+    console.log('修正・再申請:', data);
+    // 修正・再申請処理
+    alert('修正・再申請が完了しました。');
+    
+    // 申請一覧ページへ遷移
+    router.push('/billing/apply');
+  };
+
+  const handleReplySubmit = () => {
     if (!reply.trim()) {
       alert('経理からのコメントに対するリプライを入力してください。');
       return;
     }
 
-    // 修正・再申請処理
-    console.log('修正・再申請:', billing?.id, reply);
-    alert('修正・再申請が完了しました。');
+    // リプライ送信処理
+    console.log('リプライ送信:', billing?.id, reply);
+    alert('リプライを送信しました。');
     
     // 申請一覧ページへ遷移
     router.push('/billing/apply');
@@ -168,7 +181,7 @@ export default function BillingRejectPage() {
                   <strong>差戻し日:</strong> {billing.rejectedAt}
                 </p>
                 <p className="text-sm text-red-800 mt-2">
-                  {billing.rejectComment}
+                  {billing.comment}
                 </p>
               </div>
             </div>
@@ -177,7 +190,15 @@ export default function BillingRejectPage() {
           {/* 請求書情報 */}
           <div className="bg-white rounded-lg shadow-sm">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">請求書情報</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">請求書情報</h2>
+                <button
+                  onClick={handleEdit}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  請求書を編集
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-6">
@@ -199,41 +220,34 @@ export default function BillingRejectPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">申請者</label>
                   <p className="text-gray-900">{billing.appliedBy}</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">請求日</label>
+                  <p className="text-gray-900">{billing.billingDate}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">支払期限</label>
+                  <p className="text-gray-900">{billing.dueDate}</p>
+                </div>
               </div>
 
               {/* 請求項目 */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">請求項目</h3>
                 <div className="space-y-4">
-                  {billing.items.map((item, index) => (
+                  {billing.items?.map((item, index) => (
                     <div key={item.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-2">項目名</label>
-                          <input
-                            type="text"
-                            value={item.description}
-                            onChange={(e) => updateItem(index, 'description', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
+                          <p className="text-gray-900">{item.summary}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">数量</label>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
+                          <p className="text-gray-900">{item.quantity}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">単価</label>
-                          <input
-                            type="number"
-                            value={item.unitPrice}
-                            onChange={(e) => updateItem(index, 'unitPrice', Number(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
+                          <p className="text-gray-900">{formatCurrency(item.unitPrice)}</p>
                         </div>
                       </div>
                       <div className="mt-4 text-right">
@@ -241,6 +255,12 @@ export default function BillingRejectPage() {
                           小計: {formatCurrency(item.amount)}
                         </span>
                       </div>
+                      {item.remarks && (
+                        <div className="mt-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">備考</label>
+                          <p className="text-gray-900 text-sm">{item.remarks}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -255,15 +275,12 @@ export default function BillingRejectPage() {
               </div>
 
               {/* 備考 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">備考</label>
-                <textarea
-                  value={billing.remarks}
-                  onChange={(e) => setBilling(prev => prev ? { ...prev, remarks: e.target.value } : null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                />
-              </div>
+              {billing.notes && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">備考</label>
+                  <p className="text-gray-900">{billing.notes}</p>
+                </div>
+              )}
 
               {/* リプライ */}
               <div>
@@ -291,7 +308,7 @@ export default function BillingRejectPage() {
               キャンセル
             </Link>
             <button
-              onClick={handleSubmit}
+              onClick={handleReplySubmit}
               disabled={!reply.trim()}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
@@ -299,6 +316,15 @@ export default function BillingRejectPage() {
             </button>
           </div>
         </div>
+
+        {/* 統一モーダル */}
+        <UnifiedBillingModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          mode="edit"
+          billing={billing}
+          onSubmit={handleSubmit}
+        />
       </div>
     </div>
   );
