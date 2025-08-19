@@ -237,8 +237,8 @@ export default function NewInvoicePage() {
                   <div className="space-y-4">
                     {items.map((item, index) => (
                       <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          <div className="md:col-span-2">
+                        <div className="flex gap-4">
+                          <div className="w-64">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               項目名 <span className="text-red-500">*</span>
                             </label>
@@ -251,7 +251,7 @@ export default function NewInvoicePage() {
                               placeholder="項目名を入力"
                             />
                           </div>
-                          <div>
+                          <div className="w-16">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               数量
                             </label>
@@ -263,7 +263,7 @@ export default function NewInvoicePage() {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                           </div>
-                          <div>
+                          <div className="w-36">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               単価（円）
                             </label>
@@ -273,6 +273,17 @@ export default function NewInvoicePage() {
                               value={item.unitPrice}
                               onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div className="w-40">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              金額
+                            </label>
+                            <input
+                              type="text"
+                              value={`¥${item.amount.toLocaleString()}`}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                              readOnly
                             />
                           </div>
                         </div>

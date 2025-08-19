@@ -238,8 +238,10 @@ export default function BillingPage() {
 
   // サブタブ定義
   const subTabs = [
-    { id: 'farm', name: 'ファーム' },
-    { id: 'prime', name: 'プライム' },
+    { id: 'farm', name: 'コンサル事業部（ファーム）' },
+    { id: 'prime', name: 'コンサル事業部（プライム）' },
+    { id: 'telecom', name: '通信事業部' },
+    { id: 'regional', name: '地方創生事業部' },
     { id: 'new', name: '新規作成' }
   ];
 
@@ -429,8 +431,9 @@ export default function BillingPage() {
     let matchesSubTab = true;
     if (activeTab === 'create') {
       if (activeSubTab === 'new') {
-        // 新規作成タブの場合は、新規作成可能な案件を表示
-        matchesSubTab = project.userStatus === 'before_application';
+        // 新規作成タブの場合は、ファーム・プライム案件以外の新規作成可能な案件を表示
+        matchesSubTab = project.userStatus === 'before_application' && 
+          project.type !== 'farm' && project.type !== 'prime';
       } else {
         // ファーム・プライムタブの場合は、申請前と申請済みの案件を表示
         matchesSubTab = project.type === activeSubTab && 

@@ -253,8 +253,8 @@ export default function BillingNewPage() {
               <div className="space-y-4>
                 {form.items.map((item, index) => (
                   <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="md:col-span-2">
+                    <div className="flex gap-4">
+                      <div className="w-64">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           項目名
                         </label>
@@ -265,7 +265,7 @@ export default function BillingNewPage() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2ocus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
-                      <div>
+                      <div className="w-16">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           数量
                         </label>
@@ -276,7 +276,7 @@ export default function BillingNewPage() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2ocus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
-                      <div>
+                      <div className="w-36">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           単価
                         </label>
@@ -287,7 +287,7 @@ export default function BillingNewPage() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2ocus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
-                      <div>
+                      <div className="w-40">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           金額
                         </label>
