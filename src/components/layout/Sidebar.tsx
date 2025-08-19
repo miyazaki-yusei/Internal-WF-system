@@ -9,14 +9,12 @@ import {
   CalendarIcon,
   CreditCardIcon,
   UsersIcon,
-  Cog6ToothIcon,
   DocumentArrowDownIcon,
   BellIcon,
   ArrowRightOnRectangleIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
   ChartBarIcon,
-  CurrencyYenIcon
+  CurrencyYenIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -30,17 +28,9 @@ const navigation = [
   { name: 'お知らせ', href: '/notifications', icon: BellIcon },
 ]
 
-const masterNavigation = [
-  { name: '案件種別マスタ', href: '/masters/project-types' },
-  { name: '取引先マスタ', href: '/masters/customers' },
-  { name: '店舗マスタ', href: '/masters/stores' },
-  { name: '報酬マスタ', href: '/masters/rewards' },
-]
-
 export default function Sidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [isMasterOpen, setIsMasterOpen] = useState(false)
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -104,49 +94,22 @@ export default function Sidebar() {
           成績表
         </Link>
 
-        {/* マスタ設定 */}
-        <div>
-          <button
-            onClick={() => setIsMasterOpen(!isMasterOpen)}
-            className={`group flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              pathname.startsWith('/masters')
-                ? 'bg-primary-50 text-primary-700'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+        {/* マスター管理 */}
+        <Link
+          href="/master"
+          className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            pathname.startsWith('/master')
+              ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
+              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <Squares2X2Icon
+            className={`mr-3 h-5 w-5 flex-shrink-0 ${
+              pathname.startsWith('/master') ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
             }`}
-          >
-            <div className="flex items-center">
-              <Cog6ToothIcon
-                className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                  pathname.startsWith('/masters') ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
-                }`}
-              />
-              マスタ設定
-            </div>
-            {isMasterOpen ? (
-              <ChevronDownIcon className="h-4 w-4 text-gray-400" />
-            ) : (
-              <ChevronRightIcon className="h-4 w-4 text-gray-400" />
-            )}
-          </button>
-          
-          {isMasterOpen && (
-            <div className="ml-6 mt-1 space-y-1">
-              {masterNavigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                    pathname === item.href
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+          />
+          マスター管理
+        </Link>
       </nav>
 
       {/* ログアウト */}

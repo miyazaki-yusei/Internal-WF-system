@@ -1254,7 +1254,8 @@ export default function PrimeSummary() {
                               revenue: formatCurrency(selectedPeriodDetailData.sales || 0),
                               expenses: formatCurrency(Object.values(selectedPeriodDetailData.outsourcing || {}).reduce((sum: number, data: any) => sum + data.amount, 0)),
                               laborCost: '0',
-                              memo: ''
+                              memo: '',
+                              status: '未開始'
                             },
                             teamMembers: Object.entries(selectedPeriodDetailData.assignees || {}).map(([role, name]) => ({
                               id: role,
@@ -1288,6 +1289,18 @@ export default function PrimeSummary() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">案件名</td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                         {selectedPeriodDetailData.projectName}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">ステータス</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          (selectedProject?.formData.status || '未開始') === '未開始' ? 'bg-gray-100 text-gray-600' :
+                          (selectedProject?.formData.status || '未開始') === '進行中' ? 'bg-blue-100 text-blue-600' :
+                          'bg-green-100 text-green-600'
+                        }`}>
+                          {selectedProject?.formData.status || '未開始'}
+                        </span>
                       </td>
                     </tr>
                     <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">

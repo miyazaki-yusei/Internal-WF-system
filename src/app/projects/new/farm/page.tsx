@@ -32,6 +32,7 @@ export default function NewFarmProjectPage() {
     name: '',
     customer: '',
     startDate: '',
+    status: '未開始' as '未開始' | '進行中' | '完了',
     revenue: '',
     expenses: '',
     laborCost: '0',
@@ -98,16 +99,32 @@ export default function NewFarmProjectPage() {
   }, [])
 
   // 顧客リスト（サンプルデータ）
-  const customers = [
+  const [customers, setCustomers] = useState([
     'A社',
     'B社',
     'C社',
     'D社',
     'E社'
-  ]
+  ])
+
+  // 新しい顧客追加の状態
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false)
+  const [newCustomerName, setNewCustomerName] = useState('')
+
+  // 新しい役職追加の状態
+  const [showAddRoleModal, setShowAddRoleModal] = useState(false)
+  const [newRoleName, setNewRoleName] = useState('')
+
+  // 新しいメンバー追加の状態
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false)
+  const [newMemberName, setNewMemberName] = useState('')
+
+  // 新しい支出項目追加の状態
+  const [showAddPaymentItemModal, setShowAddPaymentItemModal] = useState(false)
+  const [newPaymentItemName, setNewPaymentItemName] = useState('')
 
   // 社内メンバーリスト（サンプルデータ）
-  const internalMembers = [
+  const [internalMembers, setInternalMembers] = useState([
     '田中太郎',
     '佐藤花子',
     '鈴木一郎',
@@ -116,20 +133,34 @@ export default function NewFarmProjectPage() {
     '伊藤恵子',
     '山田次郎',
     '中村由美'
-  ]
+  ])
+
+  // 役職リスト（サンプルデータ）
+  const [roles, setRoles] = useState([
+    'リーダー',
+    'メンバー',
+    '外注メンバー'
+  ])
 
   // 支払い項目リスト
-  const paymentItems = [
+  const [paymentItems, setPaymentItems] = useState([
     '人件費',
     '外注費',
     '営業支援費',
     'システム利用料',
     '交通費',
     'その他'
-  ]
+  ])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
+    
+    // 顧客名で「＋ 新しい顧客を追加」が選択された場合
+    if (name === 'customer' && value === '__add_new__') {
+      setShowAddCustomerModal(true)
+      return
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -137,16 +168,13 @@ export default function NewFarmProjectPage() {
   }
 
   const handleBudgetRatioChange = (field: keyof BudgetRatio, value: string) => {
-    // 全角→半角変換を適用
-    const normalizedValue = normalizeNumber(value)
-    
     setBudgetRatio(prev => ({
       ...prev,
-      [field]: normalizedValue
+      [field]: value
     }))
     
     // 比率が変更されたら金額を更新
-    const amount = calculateBudgetAmount(normalizedValue)
+    const amount = calculateBudgetAmount(value)
     const amountField = `${field}Amount` as keyof typeof budgetAmounts
     setBudgetAmounts(prev => ({
       ...prev,
@@ -155,23 +183,20 @@ export default function NewFarmProjectPage() {
   }
 
   const handleBudgetAmountChange = (field: keyof typeof budgetAmounts, value: string) => {
-    // 全角→半角変換を適用
-    const normalizedValue = normalizeNumber(value)
-    
     // 数値のみを抽出
-    const numericValue = normalizedValue.replace(/[^\d]/g, '')
+    const numericValue = value.replace(/[^\d]/g, '')
     
     // 値を設定
     setBudgetAmounts(prev => ({
       ...prev,
-      [field]: normalizedValue
+      [field]: value
     }))
     
     // 金額が変更されたら比率を更新
     if (numericValue) {
       const ratio = calculateBudgetRatio(numericValue)
       const ratioField = field.replace('Amount', '') as keyof BudgetRatio
-      console.log('予算金額変更:', { field, value: normalizedValue, numericValue, ratio, ratioField })
+      console.log('予算金額変更:', { field, value, numericValue, ratio, ratioField })
       setBudgetRatio(prev => ({
         ...prev,
         [ratioField]: ratio
@@ -188,24 +213,7 @@ export default function NewFarmProjectPage() {
     return ''
   }
 
-  // 全角数字を半角数字に変換する関数
-  const normalizeNumber = (value: string) => {
-    // 全角数字を半角数字に変換
-    let normalized = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-    // 全角スペースを半角スペースに変換
-    normalized = normalized.replace(/　/g, ' ')
-    // 全角カンマを半角カンマに変換
-    normalized = normalized.replace(/，/g, ',')
-    // 全角ピリオドを半角ピリオドに変換
-    normalized = normalized.replace(/．/g, '.')
-    
-    // デバッグ用ログ（変換が行われた場合のみ）
-    if (normalized !== value) {
-      console.log('全角→半角変換:', { original: value, normalized })
-    }
-    
-    return normalized
-  }
+
 
   const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -214,6 +222,27 @@ export default function NewFarmProjectPage() {
       ...prev,
       [name]: formattedValue
     }))
+  }
+
+  // ステータス更新のロジック
+  const updateStatus = () => {
+    const today = new Date()
+    const startDate = formData.startDate ? new Date(formData.startDate) : null
+    
+    // 完了条件のチェック（納品完了日や最終請求完了など）
+    // ここでは簡易的に手動で完了にできるようにする
+    
+    // 進行中条件のチェック
+    const hasRevenue = calculateRevenue() > 0
+    const hasExpenses = payments.some(payment => payment.amount && parseInt(payment.amount.replace(/[^\d]/g, '')) > 0)
+    const hasStarted = startDate && startDate <= today
+    
+    if (hasRevenue || hasExpenses || hasStarted) {
+      setFormData(prev => ({
+        ...prev,
+        status: '進行中'
+      }))
+    }
   }
 
   // 売上の自動計算（メンバーの単価合計）
@@ -281,6 +310,46 @@ export default function NewFarmProjectPage() {
     return ratio.toFixed(1)
   }
 
+  // 新しい顧客を追加する関数
+  const addNewCustomer = () => {
+    if (newCustomerName.trim()) {
+      setCustomers(prev => [...prev, newCustomerName.trim()])
+      setFormData(prev => ({
+        ...prev,
+        customer: newCustomerName.trim()
+      }))
+      setNewCustomerName('')
+      setShowAddCustomerModal(false)
+    }
+  }
+
+  // 新しい役職を追加する関数
+  const addNewRole = () => {
+    if (newRoleName.trim()) {
+      setRoles(prev => [...prev, newRoleName.trim()])
+      setNewRoleName('')
+      setShowAddRoleModal(false)
+    }
+  }
+
+  // 新しいメンバーを追加する関数
+  const addNewMember = () => {
+    if (newMemberName.trim()) {
+      setInternalMembers(prev => [...prev, newMemberName.trim()])
+      setNewMemberName('')
+      setShowAddMemberModal(false)
+    }
+  }
+
+  // 新しい支出項目を追加する関数
+  const addNewPaymentItem = () => {
+    if (newPaymentItemName.trim()) {
+      setPaymentItems(prev => [...prev, newPaymentItemName.trim()])
+      setNewPaymentItemName('')
+      setShowAddPaymentItemModal(false)
+    }
+  }
+
   // チームメンバーの追加
   const addTeamMember = () => {
     const newId = (teamMembers.length + 1).toString()
@@ -306,15 +375,9 @@ export default function NewFarmProjectPage() {
 
   // チームメンバーの更新
   const updateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
-    // 数値フィールドの場合は全角→半角変換を適用
-    let normalizedValue = value
-    if (field === 'utilizationRate' || field === 'unitPrice' || field === 'incentive') {
-      normalizedValue = normalizeNumber(value)
-    }
-    
     setTeamMembers(prev => prev.map(member => {
       if (member.id === id) {
-        const updatedMember = { ...member, [field]: normalizedValue }
+        const updatedMember = { ...member, [field]: value }
         // 役職が外注メンバーに変更された場合、名前と稼働率をクリア
         if (field === 'role' && value === 'outsource') {
           updatedMember.name = ''
@@ -346,15 +409,9 @@ export default function NewFarmProjectPage() {
 
   // 支払先の更新
   const updatePayment = (id: string, field: keyof Payment, value: string) => {
-    // 金額フィールドの場合は全角→半角変換を適用
-    let normalizedValue = value
-    if (field === 'amount') {
-      normalizedValue = normalizeNumber(value)
-    }
-    
     setPayments(prev => prev.map(payment => {
       if (payment.id === id) {
-        return { ...payment, [field]: normalizedValue }
+        return { ...payment, [field]: value }
       }
       return payment
     }))
@@ -379,7 +436,10 @@ export default function NewFarmProjectPage() {
       miscellaneousBudgetAmount: formatNumber(calculateBudgetAmount(budgetRatio.miscellaneousBudget).toString()),
       incentiveBudgetAmount: formatNumber(calculateBudgetAmount(budgetRatio.incentiveBudget).toString())
     }))
-  }, [teamMembers, payments, budgetRatio])
+
+    // ステータスを更新
+    updateStatus()
+  }, [teamMembers, payments, budgetRatio, formData.startDate])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -464,7 +524,7 @@ export default function NewFarmProjectPage() {
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* 基本情報 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 案件名 <span className="text-red-500">*</span>
@@ -485,19 +545,50 @@ export default function NewFarmProjectPage() {
               <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-2">
                 顧客名 <span className="text-red-500">*</span>
               </label>
-                             <select
-                 id="customer"
-                 name="customer"
-                 value={formData.customer}
-                 onChange={handleInputChange}
-                 required
-                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-               >
-                <option value="">顧客を選択してください</option>
-                {customers.map((customer) => (
-                  <option key={customer} value={customer}>{customer}</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  id="customer"
+                  name="customer"
+                  value={formData.customer}
+                  onChange={handleInputChange}
+                  required
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="">顧客を選択してください</option>
+                  {customers.map((customer) => (
+                    <option key={customer} value={customer}>{customer}</option>
+                  ))}
+                  <option value="__add_new__" className="text-orange-600 font-medium">
+                    ＋ 新しい顧客を追加
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ステータス
+              </label>
+              <div className="flex items-center">
+                <span className={`px-3 py-2 text-sm rounded-full ${
+                  formData.status === '未開始' ? 'bg-gray-100 text-gray-600' :
+                  formData.status === '進行中' ? 'bg-blue-100 text-blue-600' :
+                  'bg-green-100 text-green-600'
+                }`}>
+                  {formData.status}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextStatus = formData.status === '未開始' ? '進行中' : 
+                                     formData.status === '進行中' ? '完了' : '未開始'
+                    setFormData(prev => ({ ...prev, status: nextStatus }))
+                  }}
+                  className="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                >
+                  変更
+                </button>
+              </div>
             </div>
                      </div>
  
@@ -541,13 +632,25 @@ export default function NewFarmProjectPage() {
                       </label>
                       <select
                         value={member.role}
-                        onChange={(e) => updateTeamMember(member.id, 'role', e.target.value)}
+                        onChange={(e) => {
+                          if (e.target.value === '__add_new_role__') {
+                            setShowAddRoleModal(true)
+                            return
+                          }
+                          updateTeamMember(member.id, 'role', e.target.value)
+                        }}
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="leader">リーダー</option>
                         <option value="member">メンバー</option>
                         <option value="outsource">外注メンバー</option>
+                        {roles.slice(3).map((role) => (
+                          <option key={role} value={role}>{role}</option>
+                        ))}
+                        <option value="__add_new_role__" className="text-orange-600 font-medium">
+                          ＋ 新しい役職を追加
+                        </option>
                       </select>
                     </div>
                     
@@ -567,7 +670,13 @@ export default function NewFarmProjectPage() {
                       ) : (
                         <select
                           value={member.name}
-                          onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
+                          onChange={(e) => {
+                            if (e.target.value === '__add_new_member__') {
+                              setShowAddMemberModal(true)
+                              return
+                            }
+                            updateTeamMember(member.id, 'name', e.target.value)
+                          }}
                           required
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
@@ -575,6 +684,9 @@ export default function NewFarmProjectPage() {
                           {internalMembers.map((memberName) => (
                             <option key={memberName} value={memberName}>{memberName}</option>
                           ))}
+                          <option value="__add_new_member__" className="text-orange-600 font-medium">
+                            ＋ 新しいメンバーを追加
+                          </option>
                         </select>
                       )}
                     </div>
@@ -588,8 +700,7 @@ export default function NewFarmProjectPage() {
                           type="number"
                           value={member.utilizationRate}
                           onChange={(e) => {
-                            const normalizedValue = normalizeNumber(e.target.value)
-                            updateTeamMember(member.id, 'utilizationRate', normalizedValue)
+                            updateTeamMember(member.id, 'utilizationRate', e.target.value)
                           }}
                           required
                           min="0"
@@ -611,10 +722,9 @@ export default function NewFarmProjectPage() {
                                                  <input
                            type="text"
                            value={member.unitPrice}
-                           onChange={(e) => {
-                             const normalizedValue = normalizeNumber(e.target.value)
-                             updateTeamMember(member.id, 'unitPrice', normalizedValue)
-                           }}
+                                                                                                         onChange={(e) => {
+                            updateTeamMember(member.id, 'unitPrice', e.target.value)
+                          }}
                            required
                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            placeholder="例: 100,000"
@@ -631,8 +741,7 @@ export default function NewFarmProjectPage() {
                           type="number"
                           value={member.incentive}
                           onChange={(e) => {
-                            const normalizedValue = normalizeNumber(e.target.value)
-                            updateTeamMember(member.id, 'incentive', normalizedValue)
+                            updateTeamMember(member.id, 'incentive', e.target.value)
                           }}
                           min="0"
                           max="100"
@@ -752,7 +861,13 @@ export default function NewFarmProjectPage() {
                      </label>
                      <select
                        value={payment.item}
-                       onChange={(e) => updatePayment(payment.id, 'item', e.target.value)}
+                       onChange={(e) => {
+                         if (e.target.value === '__add_new_payment_item__') {
+                           setShowAddPaymentItemModal(true)
+                           return
+                         }
+                         updatePayment(payment.id, 'item', e.target.value)
+                       }}
                        required
                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                      >
@@ -760,6 +875,9 @@ export default function NewFarmProjectPage() {
                        {paymentItems.map((item) => (
                          <option key={item} value={item}>{item}</option>
                        ))}
+                       <option value="__add_new_payment_item__" className="text-orange-600 font-medium">
+                         ＋ 新しい支出項目を追加
+                       </option>
                      </select>
                    </div>
                    
@@ -772,10 +890,9 @@ export default function NewFarmProjectPage() {
                                                <input
                           type="text"
                           value={payment.amount}
-                          onChange={(e) => {
-                            const normalizedValue = normalizeNumber(e.target.value)
-                            updatePayment(payment.id, 'amount', normalizedValue)
-                          }}
+                                                                                                  onChange={(e) => {
+                          updatePayment(payment.id, 'amount', e.target.value)
+                        }}
                           required
                           className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="例: 500,000"
@@ -876,8 +993,7 @@ export default function NewFarmProjectPage() {
                        type="number"
                        value={budgetRatio.salesBudget}
                        onChange={(e) => {
-                         const normalizedValue = normalizeNumber(e.target.value)
-                         handleBudgetRatioChange('salesBudget', normalizedValue)
+                         handleBudgetRatioChange('salesBudget', e.target.value)
                        }}
                        required
                        step="0.1"
@@ -900,8 +1016,7 @@ export default function NewFarmProjectPage() {
                        type="number"
                        value={budgetRatio.miscellaneousBudget}
                        onChange={(e) => {
-                         const normalizedValue = normalizeNumber(e.target.value)
-                         handleBudgetRatioChange('miscellaneousBudget', normalizedValue)
+                         handleBudgetRatioChange('miscellaneousBudget', e.target.value)
                        }}
                        required
                        step="0.1"
@@ -924,8 +1039,7 @@ export default function NewFarmProjectPage() {
                        type="number"
                        value={budgetRatio.incentiveBudget}
                        onChange={(e) => {
-                         const normalizedValue = normalizeNumber(e.target.value)
-                         handleBudgetRatioChange('incentiveBudget', normalizedValue)
+                         handleBudgetRatioChange('incentiveBudget', e.target.value)
                        }}
                        required
                        step="0.1"
@@ -950,13 +1064,12 @@ export default function NewFarmProjectPage() {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-2 text-gray-500">¥</span>
-                                             <input
-                         type="text"
-                         value={budgetAmounts.salesBudgetAmount}
-                         onChange={(e) => {
-                           const normalizedValue = normalizeNumber(e.target.value)
-                           handleBudgetAmountChange('salesBudgetAmount', normalizedValue)
-                         }}
+                      <input
+                        type="text"
+                        value={budgetAmounts.salesBudgetAmount}
+                        onChange={(e) => {
+                          handleBudgetAmountChange('salesBudgetAmount', e.target.value)
+                        }}
                          className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                          placeholder="例: 100,000"
                        />
@@ -970,13 +1083,12 @@ export default function NewFarmProjectPage() {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-2 text-gray-500">¥</span>
-                                             <input
-                         type="text"
-                         value={budgetAmounts.miscellaneousBudgetAmount}
-                         onChange={(e) => {
-                           const normalizedValue = normalizeNumber(e.target.value)
-                           handleBudgetAmountChange('miscellaneousBudgetAmount', normalizedValue)
-                         }}
+                      <input
+                        type="text"
+                        value={budgetAmounts.miscellaneousBudgetAmount}
+                        onChange={(e) => {
+                          handleBudgetAmountChange('miscellaneousBudgetAmount', e.target.value)
+                        }}
                          className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                          placeholder="例: 25,000"
                        />
@@ -990,13 +1102,12 @@ export default function NewFarmProjectPage() {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-2 text-gray-500">¥</span>
-                                             <input
-                         type="text"
-                         value={budgetAmounts.incentiveBudgetAmount}
-                         onChange={(e) => {
-                           const normalizedValue = normalizeNumber(e.target.value)
-                           handleBudgetAmountChange('incentiveBudgetAmount', normalizedValue)
-                         }}
+                      <input
+                        type="text"
+                        value={budgetAmounts.incentiveBudgetAmount}
+                        onChange={(e) => {
+                          handleBudgetAmountChange('incentiveBudgetAmount', e.target.value)
+                        }}
                          className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                          placeholder="例: 25,000"
                        />
@@ -1240,6 +1351,238 @@ export default function NewFarmProjectPage() {
                   確定
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新しい顧客追加モーダル */}
+      {showAddCustomerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">新しい顧客を追加</h3>
+              <button
+                onClick={() => {
+                  setShowAddCustomerModal(false)
+                  setNewCustomerName('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="newCustomerName" className="block text-sm font-medium text-gray-700 mb-2">
+                顧客名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="newCustomerName"
+                value={newCustomerName}
+                onChange={(e) => setNewCustomerName(e.target.value)}
+                placeholder="例: 株式会社サンプル"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewCustomer()
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddCustomerModal(false)
+                  setNewCustomerName('')
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={addNewCustomer}
+                disabled={!newCustomerName.trim()}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新しい役職追加モーダル */}
+      {showAddRoleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">新しい役職を追加</h3>
+              <button
+                onClick={() => {
+                  setShowAddRoleModal(false)
+                  setNewRoleName('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="newRoleName" className="block text-sm font-medium text-gray-700 mb-2">
+                役職名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="newRoleName"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+                placeholder="例: シニアエンジニア"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewRole()
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddRoleModal(false)
+                  setNewRoleName('')
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={addNewRole}
+                disabled={!newRoleName.trim()}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新しいメンバー追加モーダル */}
+      {showAddMemberModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">新しいメンバーを追加</h3>
+              <button
+                onClick={() => {
+                  setShowAddMemberModal(false)
+                  setNewMemberName('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="newMemberName" className="block text-sm font-medium text-gray-700 mb-2">
+                メンバー名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="newMemberName"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                placeholder="例: 山田太郎"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewMember()
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddMemberModal(false)
+                  setNewMemberName('')
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={addNewMember}
+                disabled={!newMemberName.trim()}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新しい支出項目追加モーダル */}
+      {showAddPaymentItemModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">新しい支出項目を追加</h3>
+              <button
+                onClick={() => {
+                  setShowAddPaymentItemModal(false)
+                  setNewPaymentItemName('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="newPaymentItemName" className="block text-sm font-medium text-gray-700 mb-2">
+                支出項目名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="newPaymentItemName"
+                value={newPaymentItemName}
+                onChange={(e) => setNewPaymentItemName(e.target.value)}
+                placeholder="例: 通信費"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewPaymentItem()
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddPaymentItemModal(false)
+                  setNewPaymentItemName('')
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={addNewPaymentItem}
+                disabled={!newPaymentItemName.trim()}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                追加
+              </button>
             </div>
           </div>
         </div>

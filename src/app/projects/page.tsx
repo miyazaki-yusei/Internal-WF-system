@@ -48,6 +48,7 @@ interface Project {
     expenses: string;
     laborCost: string;
     memo: string;
+    status?: '未開始' | '進行中' | '完了';
   };
   teamMembers: TeamMember[];
   payments: Payment[];
@@ -471,11 +472,14 @@ export default function ProjectsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { text: '進行中', color: 'bg-green-100 text-green-800' },
-      completed: { text: '完了', color: 'bg-blue-100 text-blue-800' },
-      pending: { text: '待機中', color: 'bg-yellow-100 text-yellow-800' }
+      active: { text: '進行中', color: 'bg-blue-100 text-blue-600' },
+      completed: { text: '完了', color: 'bg-green-100 text-green-600' },
+      pending: { text: '未開始', color: 'bg-gray-100 text-gray-600' },
+      '未開始': { text: '未開始', color: 'bg-gray-100 text-gray-600' },
+      '進行中': { text: '進行中', color: 'bg-blue-100 text-blue-600' },
+      '完了': { text: '完了', color: 'bg-green-100 text-green-600' }
     };
-    const config = statusConfig[status as keyof typeof statusConfig];
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['未開始'];
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
         {config.text}
@@ -647,15 +651,12 @@ export default function ProjectsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   金額
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  アクション
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProjects.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     {activeTab === 'farm' ? 'ファーム案件' : 'プライム案件'}が登録されていません。新規案件を登録してください。
                   </td>
                 </tr>
@@ -669,7 +670,7 @@ export default function ProjectsPage() {
                       <div className="text-sm text-gray-900">{project.client}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(project.status)}
+                      {getStatusBadge(project.formData.status || project.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{project.startDate}</div>
@@ -679,17 +680,6 @@ export default function ProjectsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{formatCurrency(project.amount)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProjectClick(project);
-                        }}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        詳細
-                      </button>
                     </td>
                   </tr>
                 ))
@@ -797,6 +787,16 @@ export default function ProjectsPage() {
                     <div className="flex items-center py-2 border-b border-gray-100">
                       <span className="font-medium text-gray-700 w-24">案件名:</span>
                       <span className="ml-3 text-gray-900">{selectedProject.formData.name}</span>
+                    </div>
+                    <div className="flex items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700 w-24">ステータス:</span>
+                      <span className={`ml-3 px-2 py-1 text-xs rounded-full ${
+                        selectedProject.formData.status === '未開始' ? 'bg-gray-100 text-gray-600' :
+                        selectedProject.formData.status === '進行中' ? 'bg-blue-100 text-blue-600' :
+                        'bg-green-100 text-green-600'
+                      }`}>
+                        {selectedProject.formData.status || '未開始'}
+                      </span>
                     </div>
                     <div className="flex items-center py-2 border-b border-gray-100">
                       <span className="font-medium text-gray-700 w-24">顧客名:</span>

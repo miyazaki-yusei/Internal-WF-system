@@ -1313,6 +1313,16 @@ export default function FarmSummary() {
                       <span className="ml-3 text-gray-900">{selectedProject.formData.name}</span>
                     </div>
                     <div className="flex items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700 w-24">ステータス:</span>
+                      <span className={`ml-3 px-2 py-1 text-xs rounded-full ${
+                        (selectedProject.formData.status || '未開始') === '未開始' ? 'bg-gray-100 text-gray-600' :
+                        (selectedProject.formData.status || '未開始') === '進行中' ? 'bg-blue-100 text-blue-600' :
+                        'bg-green-100 text-green-600'
+                      }`}>
+                        {selectedProject.formData.status || '未開始'}
+                      </span>
+                    </div>
+                    <div className="flex items-center py-2 border-b border-gray-100">
                       <span className="font-medium text-gray-700 w-24">顧客名:</span>
                       <span className="ml-3 text-gray-900">{selectedProject.formData.customer}</span>
                     </div>
