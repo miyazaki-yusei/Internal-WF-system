@@ -570,7 +570,7 @@ Email: ${currentUser.email}`,
                                 readOnly={mode === 'view'}
                               />
                             </div>
-                            <div className="w-36">
+                            <div className="w-full">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 単価
                               </label>
@@ -719,7 +719,7 @@ Email: ${currentUser.email}`,
                       {/* CC と BCC を横並びで配置 */}
                       <div className="flex gap-4">
                         {/* CC */}
-                        <div className="w-36">
+                        <div className="w-full">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             CC
                           </label>
@@ -734,7 +734,7 @@ Email: ${currentUser.email}`,
                         </div>
                         
                         {/* BCC */}
-                        <div className="w-36">
+                        <div className="w-full">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             BCC
                           </label>
