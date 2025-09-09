@@ -134,7 +134,7 @@ export default function UnifiedBillingModal({
       items: prev.items.map(item => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value }
-          // 金額を自動計算
+          // 金額を自動計箁E
           if (field === 'unitPrice' || field === 'quantity') {
             updatedItem.amount = updatedItem.unitPrice * updatedItem.quantity
           }
@@ -190,7 +190,7 @@ export default function UnifiedBillingModal({
 
   const getCurrentUser = () => {
     return {
-      name: '田中太郎',
+      name: '田中太郁E,
       email: 'tanaka@festal.co.jp',
       department: '営業部'
     }
@@ -201,32 +201,32 @@ export default function UnifiedBillingModal({
     const totalAmount = calculateTotalAmount()
     
     return {
-      subject: `【${formData.clientName}】請求書の件`,
-      body: `${formData.clientName} 担当者様
+      subject: `、E{formData.clientName}】請求書の件`,
+      body: `${formData.clientName} 拁E��老E��E
 
-平素より格別のご高配を賜り、厚く御礼申し上げます。
+平素より格別のご高�Eを賜り、厚く御礼申し上げます、E
 
-この度、${formData.projectName}に関する請求書を発行いたしましたので、ご連絡申し上げます。
+こ�E度、E{formData.projectName}に関する請求書を発行いたしましたので、ご連絡申し上げます、E
 
-【請求書詳細】
+【請求書詳細、E
 請求書番号: ${formData.billingNumber}
 請求日: ${formData.billingDate}
-請求金額: ${formatCurrency(totalAmount)}（税込）
+請求��顁E ${formatCurrency(totalAmount)}�E�税込�E�E
 
-【請求内容】
+【請求�E容、E
 ${formData.items.map(item => `・${item.summary}: ${formatCurrency(item.unitPrice * item.quantity)}`).join('\n')}
 
-合計金額: ${formatCurrency(totalAmount)}（税込）
+合計��顁E ${formatCurrency(totalAmount)}�E�税込�E�E
 
-請求書の詳細は添付ファイルをご確認ください。
+請求書の詳細は添付ファイルをご確認ください、E
 
-ご不明な点がございましたら、お気軽にお問い合わせください。
+ご不�Eな点がございましたら、お気軽にお問ぁE��わせください、E
 
-今後ともよろしくお願いいたします。
+今後ともよろしくお願いぁE��します、E
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━E
 株式会社フェスタル
-担当: ${currentUser.name}
+拁E��E ${currentUser.name}
 TEL: 03-1234-5678
 Email: ${currentUser.email}`,
       to: `${formData.clientName.toLowerCase().replace(/\s+/g, '')}@example.com`,
@@ -288,15 +288,15 @@ Email: ${currentUser.email}`,
     setEmailContent(prev => ({ ...prev, bcc: newBccFields.filter(field => field.trim()).join(', ') }));
   };
 
-  // メールテンプレートの自動適用
+  // メールチE��プレート�E自動適用
   useEffect(() => {
     if (activeTab === 'email' && formData.clientName) {
-      // クライアント名からメールアドレスを自動生成（実際の実装ではデータベースから取得）
+      // クライアント名からメールアドレスを�E動生成（実際の実裁E��はチE�Eタベ�Eスから取得！E
       const clientEmail = `${formData.clientName.toLowerCase().replace(/\s+/g, '')}@example.com`;
       setEmailContent(prev => ({
         ...prev,
         to: clientEmail,
-        subject: `【請求書】${formData.projectName} - ${formData.billingNumber}`,
+        subject: `【請求書、E{formData.projectName} - ${formData.billingNumber}`,
         body: generateEmailContent().body
       }));
     }
@@ -324,13 +324,13 @@ Email: ${currentUser.email}`,
   const getModalTitle = () => {
     switch (mode) {
       case 'create':
-        return '請求書作成'
+        return '請求書作�E'
       case 'view':
         return '請求書詳細'
       case 'edit':
-        return '請求書編集'
+        return '請求書編雁E
       case 'approve':
-        return '請求書承認'
+        return '請求書承誁E
       case 'reject':
         return '請求書差戻'
       default:
@@ -347,7 +347,7 @@ Email: ${currentUser.email}`,
             onClick={() => setShowFinalConfirm(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-            確定
+            確宁E
           </button>
         )
       case 'edit':
@@ -357,7 +357,7 @@ Email: ${currentUser.email}`,
             onClick={() => setShowFinalConfirm(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-            確定
+            確宁E
           </button>
         )
       case 'approve':
@@ -366,7 +366,7 @@ Email: ${currentUser.email}`,
             onClick={handleApprove}
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-            承認
+            承誁E
           </button>
         )
       case 'reject':
@@ -394,11 +394,11 @@ Email: ${currentUser.email}`,
             <div>
               <h2 className="text-xl font-semibold text-gray-900">{getModalTitle()}</h2>
               <p className="text-gray-600 mt-1">
-                {mode === 'create' && '新しい請求書の情報を入力してください'}
+                {mode === 'create' && '新しい請求書の惁E��を�E力してください'}
                 {mode === 'view' && '請求書の詳細を確認してください'}
-                {mode === 'edit' && '請求書の情報を編集してください'}
-                {mode === 'approve' && '請求書の内容を確認して承認してください'}
-                {mode === 'reject' && '請求書の差戻理由を入力してください'}
+                {mode === 'edit' && '請求書の惁E��を編雁E��てください'}
+                {mode === 'approve' && '請求書の冁E��を確認して承認してください'}
+                {mode === 'reject' && '請求書の差戻琁E��を�E力してください'}
               </p>
             </div>
             <button
@@ -409,7 +409,7 @@ Email: ${currentUser.email}`,
             </button>
           </div>
 
-          {/* メインコンテンツ */}
+          {/* メインコンチE��チE*/}
           <div className="p-6">
             {/* タブナビゲーション */}
             <div className="flex border-b border-gray-200 mb-6">
@@ -421,7 +421,7 @@ Email: ${currentUser.email}`,
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                請求内容
+                請求�E容
               </button>
               <button
                 onClick={() => setActiveTab('email')}
@@ -431,21 +431,21 @@ Email: ${currentUser.email}`,
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                メール内容
+                メール冁E��
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 請求内容タブ */}
+              {/* 請求�E容タチE*/}
               {activeTab === 'billing' && (
                 <div className="space-y-6">
-                  {/* 案件情報 */}
+                  {/* 案件惁E�� */}
                   <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">案件情報</h3>
+                    <h3 className="text-md font-medium text-gray-900 mb-4">案件惁E��</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          案件名 <span className="text-red-500">*</span>
+                          案件吁E<span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -453,7 +453,7 @@ Email: ${currentUser.email}`,
                           value={formData.projectName}
                           onChange={(e) => handleInputChange('projectName', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="案件名を入力"
+                          placeholder="案件名を入劁E
                           readOnly={mode === 'view'}
                         />
                       </div>
@@ -467,19 +467,19 @@ Email: ${currentUser.email}`,
                           value={formData.clientName}
                           onChange={(e) => handleInputChange('clientName', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="クライアント名を入力"
+                          placeholder="クライアント名を�E劁E
                           readOnly={mode === 'view'}
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          担当者
+                          拁E��老E
                         </label>
                         <input
                           type="text"
                           value={billing?.appliedBy || ''}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                          placeholder="担当者名"
+                          placeholder="拁E��老E��"
                           readOnly
                         />
                       </div>
@@ -506,7 +506,7 @@ Email: ${currentUser.email}`,
                           placeholder="請求書番号"
                           readOnly={mode === 'view'}
                         />
-                        <p className="text-xs text-gray-500 mt-1">(自動生成) フォーマット: YYYYMMDDSSCC</p>
+                        <p className="text-xs text-gray-500 mt-1">(自動生戁E フォーマッチE YYYYMMDDSSCC</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -523,7 +523,7 @@ Email: ${currentUser.email}`,
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          支払期限
+                          支払期陁E
                         </label>
                         <input
                           type="date"
@@ -537,28 +537,28 @@ Email: ${currentUser.email}`,
                     </div>
                   </div>
 
-                  {/* 請求項目 */}
+                  {/* 請求頁E�� */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-md font-medium text-gray-900">請求項目</h3>
+                      <h3 className="text-md font-medium text-gray-900">請求頁E��</h3>
                       {(mode === 'create' || mode === 'edit') && (
                         <button
                           type="button"
                           onClick={addItem}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
                         >
                           <PlusIcon className="w-4 h-4" />
-                          項目を追加
+                          頁E��を追加
                         </button>
                       )}
                     </div>
                     <div className="space-y-4">
                       {formData.items.map((item, index) => (
-                        <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div key={item.id} className="relative p-4 bg-gray-50 rounded-lg">
                           <div className="flex gap-4">
                             <div className="w-64">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                摘要 <span className="text-red-500">*</span>
+                                摘要E<span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -566,7 +566,7 @@ Email: ${currentUser.email}`,
                                 value={item.summary}
                                 onChange={(e) => handleItemChange(item.id, 'summary', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="摘要を入力"
+                                placeholder="摘要を入劁E
                                 readOnly={mode === 'view'}
                               />
                             </div>
@@ -585,7 +585,7 @@ Email: ${currentUser.email}`,
                             </div>
                             <div className="w-16">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                数量
+                                数釁E
                               </label>
                               <input
                                 type="number"
@@ -598,7 +598,7 @@ Email: ${currentUser.email}`,
                             </div>
                             <div className="w-40">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                金額
+                                金顁E
                               </label>
                               <input
                                 type="text"
@@ -609,14 +609,14 @@ Email: ${currentUser.email}`,
                             </div>
                             <div className="flex-1 min-w-0">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                備考
+                                備老E
                               </label>
                               <input
                                 type="text"
                                 value={item.remarks}
                                 onChange={(e) => handleItemChange(item.id, 'remarks', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="備考"
+                                placeholder="備老E
                                 readOnly={mode === 'view'}
                               />
                             </div>
@@ -625,7 +625,7 @@ Email: ${currentUser.email}`,
                             <button
                               type="button"
                               onClick={() => removeItem(item.id)}
-                              className="mt-2 text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                              className="absolute top-2 right-2 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-all duration-200"
                             >
                               <TrashIcon className="w-4 h-4" />
                               削除
@@ -636,9 +636,9 @@ Email: ${currentUser.email}`,
                     </div>
                   </div>
 
-                  {/* 税区分・合計 */}
+                  {/* 税区刁E�E合訁E*/}
                   <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">税区分・合計</h3>
+                    <h3 className="text-md font-medium text-gray-900 mb-4">税区刁E�E合訁E/h3>
                     <div className="flex gap-6">
                       <div className="w-48">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -657,15 +657,15 @@ Email: ${currentUser.email}`,
                       <div className="bg-gray-50 rounded-lg p-4 flex-1">
                         <div className="space-y-3">
                           <div className="flex justify-between">
-                            <span className="text-gray-600">小計:</span>
+                            <span className="text-gray-600">小訁E</span>
                             <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">消費税({formData.taxRate}%):</span>
+                            <span className="text-gray-600">消費稁E{formData.taxRate}%):</span>
                             <span className="font-medium">{formatCurrency(calculateTaxAmount())}</span>
                           </div>
                           <div className="flex justify-between text-lg font-bold text-blue-600 border-t border-gray-200 pt-3">
-                            <span>合計:</span>
+                            <span>合訁E</span>
                             <span>{formatCurrency(calculateTotalAmount())}</span>
                           </div>
                         </div>
@@ -673,18 +673,18 @@ Email: ${currentUser.email}`,
                     </div>
                   </div>
 
-                  {/* 承認・差戻コメント */}
+                  {/* 承認�E差戻コメンチE*/}
                   {(mode === 'approve' || mode === 'reject') && (
                     <div>
                       <h3 className="text-md font-medium text-gray-900 mb-4">
-                        {mode === 'approve' ? '承認コメント' : '差戻理由'}
+                        {mode === 'approve' ? '承認コメンチE : '差戻琁E��'}
                       </h3>
                       <textarea
                         rows={4}
                         value={mode === 'approve' ? approveComment : rejectComment}
                         onChange={(e) => mode === 'approve' ? setApproveComment(e.target.value) : setRejectComment(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder={mode === 'approve' ? '承認コメントを入力してください（任意）' : '差戻理由を入力してください'}
+                        placeholder={mode === 'approve' ? '承認コメントを入力してください�E�任意！E : '差戻琁E��を�E力してください'}
                         required={mode === 'reject'}
                       />
                     </div>
@@ -692,18 +692,18 @@ Email: ${currentUser.email}`,
                 </div>
               )}
 
-                            {/* メール内容タブ */}
+                            {/* メール冁E��タチE*/}
               {activeTab === 'email' && (
                 <div className="space-y-6">
-                  {/* メール内容 */}
+                  {/* メール冁E�� */}
                   <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">メール内容</h3>
+                    <h3 className="text-md font-medium text-gray-900 mb-4">メール冁E��</h3>
                     
                     <div className="space-y-4">
-                      {/* 宛先 */}
+                      {/* 宛�E */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          宛先 <span className="text-red-500">*</span>
+                          宛�E <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="email"
@@ -711,7 +711,7 @@ Email: ${currentUser.email}`,
                           value={emailContent.to}
                           onChange={(e) => setEmailContent(prev => ({ ...prev, to: e.target.value }))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="メールアドレスを入力"
+                          placeholder="メールアドレスを�E劁E
                           readOnly={mode === 'view'}
                         />
                       </div>
@@ -749,10 +749,10 @@ Email: ${currentUser.email}`,
                         </div>
                       </div>
                       
-                      {/* 件名 */}
+                      {/* 件吁E*/}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          件名 <span className="text-red-500">*</span>
+                          件吁E<span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -760,15 +760,15 @@ Email: ${currentUser.email}`,
                           value={emailContent.subject}
                           onChange={(e) => setEmailContent(prev => ({ ...prev, subject: e.target.value }))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="メール件名を入力"
+                          placeholder="メール件名を入劁E
                           readOnly={mode === 'view'}
                         />
                       </div>
                       
-                      {/* メール本文 */}
+                      {/* メール本斁E*/}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          本文 <span className="text-red-500">*</span>
+                          本斁E<span className="text-red-500">*</span>
                         </label>
                         <textarea
                           rows={6}
@@ -776,7 +776,7 @@ Email: ${currentUser.email}`,
                           value={emailContent.body}
                           onChange={(e) => setEmailContent(prev => ({ ...prev, body: e.target.value }))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="メール本文を入力"
+                          placeholder="メール本斁E��入劁E
                           readOnly={mode === 'view'}
                         />
                       </div>
@@ -820,26 +820,26 @@ Email: ${currentUser.email}`,
 
             <div className="px-6 py-4">
               <div className="space-y-6">
-                {/* 確認メッセージ */}
+                {/* 確認メチE��ージ */}
                 <div className="text-center">
                   <div className="mb-4">
                     <svg className="w-12 h-12 text-blue-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">経理申請の確認</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">経理申請�E確誁E/h3>
                     <p className="text-gray-600">
-                      この内容で経理担当者へ申請してもよろしいですか？
+                      こ�E冁E��で経理拁E��老E��申請してもよろしぁE��すか�E�E
                     </p>
                   </div>
                 </div>
 
-                {/* 申請者コメント */}
+                {/* 申請老E��メンチE*/}
                 <div className="border rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 mb-3">申請者コメント</h3>
+                  <h3 className="font-medium text-gray-900 mb-3">申請老E��メンチE/h3>
                   <textarea
                     value={applicantComment}
                     onChange={(e) => setApplicantComment(e.target.value)}
-                    placeholder="申請に関するコメントがあれば入力してください（任意）"
+                    placeholder="申請に関するコメントがあれば入力してください�E�任意！E
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
                   />
@@ -882,7 +882,7 @@ Email: ${currentUser.email}`,
                     }}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                   >
-                    経理申請
+                    経理申諁E
                   </button>
                 </div>
               </div>

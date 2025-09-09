@@ -52,7 +52,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
     const newItems = [...items]
     newItems[index] = { ...newItems[index], [field]: value }
     
-    // 金額を自動計算
+    // 金額を自動計箁E
     if (field === 'quantity' || field === 'unitPrice') {
       const quantity = field === 'quantity' ? Number(value) : newItems[index].quantity
       const unitPrice = field === 'unitPrice' ? Number(value) : newItems[index].unitPrice
@@ -101,8 +101,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
         {/* ヘッダー */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">新規請求書作成</h2>
-            <p className="text-gray-600 mt-1">新しい請求書の情報を入力してください</p>
+            <h2 className="text-xl font-semibold text-gray-900">新規請求書作�E</h2>
+            <p className="text-gray-600 mt-1">新しい請求書の惁E��を�E力してください</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -121,19 +121,19 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
           </div>
         </div>
 
-        {/* メインコンテンツ */}
+        {/* メインコンチE��チE*/}
         <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* フォーム */}
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* 基本情報 */}
+                {/* 基本惁E�� */}
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4">基本情報</h3>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">基本惁E��</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        顧客名 <span className="text-red-500">*</span>
+                        顧客吁E<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -141,12 +141,12 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                         value={formData.client}
                         onChange={(e) => handleInputChange('client', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="顧客名を入力"
+                        placeholder="顧客名を入劁E
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        案件名 <span className="text-red-500">*</span>
+                        案件吁E<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -154,7 +154,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                         value={formData.project}
                         onChange={(e) => handleInputChange('project', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="案件名を入力"
+                        placeholder="案件名を入劁E
                       />
                     </div>
                     <div>
@@ -184,9 +184,9 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                   </div>
                 </div>
 
-                {/* 顧客情報 */}
+                {/* 顧客惁E�� */}
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4">顧客情報</h3>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">顧客惁E��</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -197,7 +197,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                         value={formData.clientAddress}
                         onChange={(e) => handleInputChange('clientAddress', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="顧客の住所を入力"
+                        placeholder="顧客の住所を�E劁E
                       />
                     </div>
                     <div className="space-y-4">
@@ -210,7 +210,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                           value={formData.clientPhone}
                           onChange={(e) => handleInputChange('clientPhone', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="電話番号を入力"
+                          placeholder="電話番号を�E劁E
                         />
                       </div>
                       <div>
@@ -222,24 +222,24 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                           value={formData.clientEmail}
                           onChange={(e) => handleInputChange('clientEmail', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="メールアドレスを入力"
+                          placeholder="メールアドレスを�E劁E
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 請求項目 */}
+                {/* 請求頁E�� */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-medium text-gray-900">請求項目</h3>
+                    <h3 className="text-md font-medium text-gray-900">請求頁E��</h3>
                     <button
                       type="button"
                       onClick={addItem}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
                     >
                       <PlusIcon className="w-4 h-4" />
-                      項目追加
+                      頁E��追加
                     </button>
                   </div>
                   <div className="space-y-4">
@@ -248,7 +248,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                         <div className="flex gap-4">
                           <div className="w-64">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              項目名 <span className="text-red-500">*</span>
+                              頁E��吁E<span className="text-red-500">*</span>
                             </label>
                             <input
                               type="text"
@@ -256,12 +256,12 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                               value={item.description}
                               onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              placeholder="項目名を入力"
+                              placeholder="頁E��名を入劁E
                             />
                           </div>
                           <div className="w-16">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              数量
+                              数釁E
                             </label>
                             <input
                               type="number"
@@ -273,7 +273,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                           </div>
                           <div className="w-36">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              単価（円）
+                              単価�E��E�E�E
                             </label>
                             <input
                               type="number"
@@ -285,7 +285,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                           </div>
                           <div className="w-40">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              金額
+                              金顁E
                             </label>
                             <input
                               type="text"
@@ -297,7 +297,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <div>
-                            <span className="text-sm text-gray-600">金額: </span>
+                            <span className="text-sm text-gray-600">金顁E </span>
                             <span className="font-medium">¥{item.amount.toLocaleString()}</span>
                           </div>
                           {items.length > 1 && (
@@ -315,36 +315,36 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                   </div>
                 </div>
 
-                {/* 金額計算 */}
+                {/* 金額計箁E*/}
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4">金額計算</h3>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">金額計箁E/h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">小計:</span>
+                        <span className="text-gray-600">小訁E</span>
                         <span className="font-medium">¥{subtotal.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">消費税（{formData.taxRate * 100}%）:</span>
+                        <span className="text-gray-600">消費税！EformData.taxRate * 100}%�E�E</span>
                         <span className="font-medium">¥{taxAmount.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-lg font-bold text-blue-600 border-t border-gray-200 pt-3">
-                        <span>合計:</span>
+                        <span>合訁E</span>
                         <span>¥{totalAmount.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 備考 */}
+                {/* 備老E*/}
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4">備考</h3>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">備老E/h3>
                   <textarea
                     rows={4}
                     value={formData.notes}
                     onChange={(e) => handleInputChange('notes', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="備考があれば入力してください"
+                    placeholder="備老E��あれば入力してください"
                   />
                 </div>
 
@@ -361,7 +361,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                     type="submit"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
                   >
-                    請求書を作成
+                    請求書を作�E
                   </button>
                 </div>
               </form>
@@ -373,8 +373,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">プレビュー</h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium text-gray-900">{formData.client || '顧客名'}</h4>
-                    <p className="text-sm text-gray-600">{formData.project || '案件名'}</p>
+                    <h4 className="font-medium text-gray-900">{formData.client || '顧客吁E}</h4>
+                    <p className="text-sm text-gray-600">{formData.project || '案件吁E}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -388,13 +388,13 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                   </div>
                   {items.some(item => item.description) && (
                     <div>
-                      <h5 className="font-medium text-gray-900 mb-2">請求項目</h5>
+                      <h5 className="font-medium text-gray-900 mb-2">請求頁E��</h5>
                       <div className="space-y-2">
                         {items.filter(item => item.description).map((item, index) => (
                           <div key={index} className="text-sm">
                             <span className="font-medium">{item.description}</span>
                             <span className="text-gray-600 ml-2">
-                              {item.quantity} × ¥{item.unitPrice.toLocaleString()} = ¥{item.amount.toLocaleString()}
+                              {item.quantity} ÁE¥{item.unitPrice.toLocaleString()} = ¥{item.amount.toLocaleString()}
                             </span>
                           </div>
                         ))}
@@ -405,15 +405,15 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                     <div className="p-4 bg-white rounded-lg">
                       <div className="text-sm space-y-1">
                         <div className="flex justify-between">
-                          <span>小計</span>
+                          <span>小訁E/span>
                           <span>¥{subtotal.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>消費税</span>
+                          <span>消費稁E/span>
                           <span>¥{taxAmount.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
-                          <span>合計</span>
+                          <span>合訁E/span>
                           <span className="text-blue-600">¥{totalAmount.toLocaleString()}</span>
                         </div>
                       </div>
@@ -421,7 +421,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit }: Create
                   )}
                   {formData.notes && (
                     <div>
-                      <h5 className="font-medium text-gray-900 mb-2">備考</h5>
+                      <h5 className="font-medium text-gray-900 mb-2">備老E/h5>
                       <p className="text-sm text-gray-600">{formData.notes}</p>
                     </div>
                   )}
